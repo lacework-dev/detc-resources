@@ -1,0 +1,22 @@
+---
+name: EC2Instance # Name you'll reference this ext as
+args:     # These automatically get passed through to the underlying ext as args
+  vpc_id:
+    type: string
+    required: true
+  subnet:
+    type: string
+    required: true
+  instance_name:
+    type: string
+    required: true
+source: # Where to get the code the underlying ext should run
+  location: "https://github.com/lacework-dev/detc-resources"
+  subdir: "extensions/ec2instance"
+extension: # Core extension name/args to set.  These args are static vs the supplied ones above
+  name: Terraform 
+  args:
+    cloud: AWS
+    outputs:
+      - ip
+      - pem
