@@ -11,7 +11,7 @@ args:     # These automatically get passed through to the underlying ext as args
     type: string
     required: true
 source: # Where to get the code the underlying ext should run
-  location: "https://github.com/lacework-dev/detc-resources"
+  location: "https://github.com/lacework-dev/detc-resources.git"
   subdir: "extensions/ec2instance"
 extension: # Core extension name/args to set.  These args are static vs the supplied ones above
   name: Terraform 
