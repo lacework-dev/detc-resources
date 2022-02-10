@@ -13,16 +13,20 @@ testeks:
       source: https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/voteapp.yml
       needs:
         - eks
+      lookup:
+        kubectl_config: 
+          key: /eks/outputs/kubectl_config
+          secret: true
+        control_plane_url: /eks/outputs/cluster_endpoint
       helpers:
         - helper: WriteValue
           run_on_dryrun: true
           args:
-            raw_value: !lookupSecret /eks/outputs/kubectl_config
+            name: kubectl_config
             dstfile: kubectl
       args:
-        control_plane_url: !lookup /eks/outputs/cluster_endpoint
         kubectl_config_file: kubectl
-        kube_manifest_path: vote.yml
+        kube_manifest_path: voteapp.yml
         wait_for:
            vote_app_url:
               app_name: "vote"
