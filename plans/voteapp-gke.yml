@@ -1,0 +1,98 @@
+---
+VoteAppGKE:
+  steps:
+    - name: gke
+      extension: GKE
+      tags: infrastructure
+      args:
+        region: !secret gcp.region
+        project: !secret gcp.project_id
+        cluster_name: "gke-k8-cluster"
+    - name: voteapp
+      extension: Kubectl
+      tags: applications
+      source: https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/voteapp.yml
+      needs:
+        - gke
+      helpers:
+        - helper: GKEKubectl
+        - helper: GenerateOutput
+          lifecycle: [ afterCreate ]
+          args:
+            dst: "vote_app_url"
+            format: "http://{{ .vote }}"
+        - helper: GenerateOutput
+          lifecycle: [ afterCreate ]
+          args:
+            dst: "result_app_url"
+            format: "http://{{ .result }}"
+      lookup:
+        control_plane_url: /gke/outputs/cluster_endpoint
+        kubectl_config: /gke/outputs/kubectl_config
+      args:
+        kubectl_config_file: "kubectl"
+        kube_manifest_path: voteapp.yml
+        cluster_name: !lookup /gke/outputs/cluster_name
+        wait_for:
+           vote_app_url:
+              app_name: "vote"
+              field: "load_balancer_ip"
+           results_app_url:
+              app_name: "result"
+              field: "load_balancer_ip"
+    - name: lacework
+      extension: Kubectl
+      tags: monitoring
+      source:
+        location: https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/lacework-all-k8s.yaml
+        templates:
+          - "lacework-all-k8s.yaml"
+      needs:
+        - gke
+      helpers:
+        - helper: GKEKubectl
+      lookup:
+        control_plane_url: /gke/outputs/cluster_endpoint
+        kubectl_config: /gke/outputs/kubectl_config
+        cluster_name: !lookup /gke/outputs/cluster_name
+      args:
+        lw_access_token: !secret lacework.access_token
+        kubectl_config_file: kubectl
+        kube_manifest_path: "lacework-all-k8s.yaml"
+    - name: instance
+      extension: GCPCompute
+      tags: infra
+      needs:
+        - voteapp
+      args:
+        region: !secret gcp.region
+        project: !secret gcp.project_id
+        instance_name: "vote-traffic"
+    - name: traffic
+      extension: Ansible
+      source: https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/traffic/install_traffic.yml
+      needs:
+        - instance
+      helpers:
+        - helper: ServiceAvailable
+          args:
+            max_wait: 60 # seconds
+            hostname: !lookup /instance/outputs/ip
+            port: 22
+        - helper: WriteValue
+          run_on_dryrun: true
+          args:
+            raw_value: !lookupSecret /instance/outputs/ssh_key
+            dstfile: instance.ssh_key
+            mode: 0600
+      args:
+        user: "ubuntu"
+        private_key: instance.ssh_key
+        inventory: !lookup /instance/outputs/ip
+        playbook: install_traffic.yml
+        privilege_escalation:
+          become: true
+        extra_vars:
+          vote_app_url: !lookup /voteapp/outputs/vote_app_url
+          result_app_url: !lookup /voteapp/outputs/result_app_url
+
