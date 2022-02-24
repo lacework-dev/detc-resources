@@ -1,0 +1,46 @@
+---
+quickstart: # Deployment
+  steps:
+    - name: quickstart-vpc
+      extension: VPC.AWS
+      tags: infrastructure
+      args:
+        name: quickstart-vpc
+    - name: quickstart-ec2
+      extension: EC2Instance
+      tags: infrastructure
+      needs:
+        - quickstart-vpc
+      args:
+        vpc_id: !lookup /quickstart-vpc/outputs/vpc_id
+        subnet: !lookup /quickstart-vpc/outputs/subnet_id1
+        instance_name: quickstart-ec2
+        ports: "22,3000"
+    - name: quickstart-nodeapp
+      extension: Ansible
+      source: git+https://github.com/lacework-dev/detc-resources
+      tags: application
+      needs:
+        - quickstart-ec2
+      helpers:
+        - helper: ServiceAvailable # Ensure deployed ec2 instance is running and available on port 22
+          args:
+            hostname: !lookup /quickstart-ec2/outputs/ip
+            port: 22
+        - helper: WriteValue # Write out the pem file created for ec2 instance
+          run_on_dryrun: true
+          args:
+            raw_value: !lookupSecret /quickstart-ec2/outputs/pem
+            dstfile: instance.pem
+            mode: 0600
+      args:
+        inventory: !lookup /quickstart-ec2/outputs/ip
+        private_key: instance.pem
+        galaxy:
+          roles:
+            - geerlingguy.nodejs
+        user: "ubuntu"
+        playbook: apps/quickstart-node/nodeapp.yml
+        privilege_escalation:
+          become: true
+

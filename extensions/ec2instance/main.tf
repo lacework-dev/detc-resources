@@ -1,6 +1,9 @@
 variable "vpc_id" {}
 variable "subnet" {}
 variable "instance_name" {}
+variable "ports" {
+  default = "22"
+}
 
 resource "tls_private_key" "keypair" {
   algorithm = "RSA"
@@ -27,17 +30,23 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
-resource "aws_security_group" "ingress-ssh-from-all" {
-  name   = "${var.instance_name}-allow-all-ssh-sg"
+locals {
+  split_ports = split(",", var.ports)
+}
+
+resource "aws_security_group" "ingress-from-all" {
+  name   = "${var.instance_name}-ingress-sg"
   vpc_id = var.vpc_id
 
-  ingress {
-    cidr_blocks = [
-      "0.0.0.0/0"
-    ]
-    from_port = 22
-    to_port   = 22
-    protocol  = "tcp"
+  dynamic "ingress" {
+    for_each = local.split_ports
+    content {
+      description = "open port ${ingress.value}"
+      from_port   = tonumber(ingress.value)
+      to_port     = tonumber(ingress.value)
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
   }
 
   egress {
@@ -56,10 +65,10 @@ resource "aws_instance" "instance-server" {
   instance_type               = "t2.medium"
   associate_public_ip_address = true
   subnet_id                   = var.subnet
-  vpc_security_group_ids      = [aws_security_group.ingress-ssh-from-all.id]
+  vpc_security_group_ids      = [aws_security_group.ingress-from-all.id]
 
   key_name   = "${var.instance_name}-server-key"
-  depends_on = [aws_key_pair.server-key, aws_security_group.ingress-ssh-from-all]
+  depends_on = [aws_key_pair.server-key, aws_security_group.ingress-from-all]
 }
 
 output "ip" {

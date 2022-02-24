@@ -1,0 +1,28 @@
+- hosts: all
+  tasks:
+    - name: Update apt repo and cache on all Debian/Ubuntu boxes
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+      become: true
+
+- hosts: all
+  roles:
+    - geerlingguy.nodejs
+  tasks:
+    - name: Create APP Directory
+      file: path=/usr/local/src/quickstart-app state=directory
+
+    - name: Copy source file
+      copy:
+        src: "{{ playbook_dir }}/index.js"
+        dest: /usr/local/src/quickstart-app/index.js
+
+    - name: Install pm2
+      npm: name=pm2 global=yes production=yes
+
+    - name: Stop APP
+      command: pm2 stop app chdir=/usr/local/src/quickstart-app
+      ignore_errors: yes
+
+    - name: Start APP
+      command: pm2 start index.js --name app chdir=/usr/local/src/quickstart-app
+      ignore_errors: yes
