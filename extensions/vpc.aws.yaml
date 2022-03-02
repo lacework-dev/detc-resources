@@ -1,0 +1,17 @@
+---
+name: VPC.AWS
+args:
+  name:
+    type: string
+    required: true
+source:
+  location: "git+https://github.com/lacework-dev/detc-resources.git"
+  subdir: "extensions/vpc/aws"
+extension:
+  name: Terraform
+  args:
+    cloud: AWS
+    outputs:
+      - vpc_id
+      - subnet_id1
+      - subnet_id2
