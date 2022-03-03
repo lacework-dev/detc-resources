@@ -17,20 +17,21 @@
       state: present
   - name: Git checkout
     ansible.builtin.git:
-      repo: 'https://github.com/lacework-community/detc_poc.git'
-      dest: /home/ubuntu/detc_poc
+      repo: 'https://github.com/lacework-dev/detc-resources.git'
+      version: "go/vote_app_lw_traffic_dirs"
+      dest: /home/ubuntu/detc-resources
       force: true
   - name: Install npm packages
     community.general.npm:
-      path: /home/ubuntu/detc_poc/loadgen/
+      path: /home/ubuntu/detc-resources/apps/traffic/web-traffic
   - name: write vote app url to file
     copy:
       content: { "vote_app": "http://{{ vote_app_url}}" }
-      dest: /home/ubuntu/detc_poc/loadgen/vote_urls.json
+      dest: /home/ubuntu/detc-resources/apps/traffic/web-traffic/vote_urls.json
   - name: write result app url to file
     copy:
       content: { "results_app": "http://{{ results_app_url}}" }
-      dest: /home/ubuntu/detc_poc/loadgen/result_urls.json
+      dest: /home/ubuntu/detc-resources/apps/traffic/web-traffic/result_urls.json
   - name: Write systemd config file
     blockinfile:
       path: /etc/systemd/system/loadgen.service
@@ -45,7 +46,7 @@
         Restart=always
         KillSignal=SIGQUIT
         WorkingDirectory=/home/ubuntu/detc_poc/loadgen
-        ExecStart=/usr/bin/node /home/ubuntu/detc_poc/loadgen/loadgen.js
+        ExecStart=/usr/bin/node /home/ubuntu/detc-resources/apps/traffic/web-traffic/loadgen.js
 
         [Install]
         WantedBy=multi-user.target
