@@ -1,0 +1,31 @@
+---
+name: AKS 
+args:
+  azure_app_id:
+    type: string
+    required: true
+  azure_password:
+    type: string
+    required: true
+  azure_subscription_id:
+    type: string
+    required: true
+  azure_tenant_id:
+    type: string
+    required: true
+  deployment_name:
+    type: string
+    required: true
+source: # Where to get the code the underlying ext should run
+  location: "git+https://github.com/lacework-dev/detc-resources.git"
+  subdir: "extensions/aks"
+extension: # Core extension name/args to set.  These args are static vs the supplied ones above
+  name: Terraform 
+  args:
+    cloud: AWS
+    outputs:
+      - cluster_id
+      - cluster_name
+      - cluster_endpoint
+      - kubectl_config
+      - resource_group_name
