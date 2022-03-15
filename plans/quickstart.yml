@@ -33,6 +33,11 @@ quickstart: # Deployment
             raw_value: !lookupSecret /quickstart-ec2/outputs/pem
             dstfile: instance.pem
             mode: 0600
+        - helper: GenerateOutput
+          args:
+            dst: "app_url"
+            format: "http://{{ .inventory }}:3000"
+
       args:
         inventory: !lookup /quickstart-ec2/outputs/ip
         private_key: instance.pem
