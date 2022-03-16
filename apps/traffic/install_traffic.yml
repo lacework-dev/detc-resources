@@ -1,0 +1,57 @@
+---
+- name: Traffic Driver
+  hosts: all
+  remote_user: ubuntu
+
+  tasks:
+  - name: Update apt
+    apt:
+      update_cache: yes
+  - name: Install packages
+    apt:
+      pkg:
+        - nodejs
+        - npm
+        - unzip
+        - wget
+      state: present
+  - name: Git checkout
+    ansible.builtin.git:
+      repo: 'https://github.com/lacework-community/detc_poc.git'
+      dest: /home/ubuntu/detc_poc
+      force: true
+  - name: Install npm packages
+    community.general.npm:
+      path: /home/ubuntu/detc_poc/loadgen/
+  - name: write vote app url to file
+    copy:
+      content: { "vote_app": "{{ vote_app_url}}" }
+      dest: /home/ubuntu/detc_poc/loadgen/vote_urls.json
+  - name: write result app url to file
+    copy:
+      content: { "results_app": "{{ result_app_url}}" }
+      dest: /home/ubuntu/detc_poc/loadgen/result_urls.json
+  - name: Write systemd config file
+    blockinfile:
+      path: /etc/systemd/system/loadgen.service
+      create: true
+      state: present
+      block: |
+        [Unit]
+        Description=Loadgen web traffic driver
+
+        [Service]
+        PIDFile=/tmp/loadgen-99.pid
+        Restart=always
+        KillSignal=SIGQUIT
+        WorkingDirectory=/home/ubuntu/detc_poc/loadgen
+        ExecStart=/usr/bin/node /home/ubuntu/detc_poc/loadgen/loadgen.js
+
+        [Install]
+        WantedBy=multi-user.target
+
+  - name: Make sure a service unit is running
+    ansible.builtin.systemd:
+      name: loadgen.service
+      enabled: yes
+      state: started
