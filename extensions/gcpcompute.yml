@@ -1,0 +1,20 @@
+---
+name: GCPCompute
+args:
+  instance_name:
+    type: string
+    required: true
+  region:
+    type: string
+    required: true
+    extension_arg: region
+source:
+  location: "git+https://github.com/lacework-dev/detc-resources.git"
+  subdir: "extensions/gcpcompute"
+extension:
+  name: Terraform 
+  args:
+    cloud: GCP
+    outputs:
+      - ip
+      - ssh_key

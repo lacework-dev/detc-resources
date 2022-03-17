@@ -1,0 +1,26 @@
+---
+name: GKE
+args:
+  region:
+    type: string
+    required: true
+  project:
+    type: string
+    required: true
+  cluster_name:
+    type: string
+    required: true
+source:
+  location: "git+https://github.com/lacework-dev/detc-resources.git"
+  subdir: "extensions/gke"
+extension:
+  name: Terraform 
+  args:
+    cloud: GCP
+    outputs:
+      - cluster_endpoint
+      - kubectl_config
+      - host
+      - cluster_ca_certificate
+      - token
+      - cluster_name
