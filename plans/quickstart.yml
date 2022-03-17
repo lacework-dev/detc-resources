@@ -1,12 +1,21 @@
 ---
 quickstart: # Deployment
+  description: |
+    This simple plan will do the following;
+
+        - Create a new AWS VPC
+        - Create a new Ubuntu EC2 instance
+        - Setup NodeJS and PM2 on that instance
+        - Deploy a simple NodeJS application to the new instance
   steps:
     - name: quickstart-vpc
+      description: Create a new AWS Virtual Private Cloud (VPC) for the quickstart app to reside in
       extension: VPC.AWS
       tags: infrastructure
       args:
         name: quickstart-vpc
     - name: quickstart-ec2
+      description: Create a new Ubuntu AWS EC2 instance that will host the quickstart application
       extension: EC2Instance
       tags: infrastructure
       needs:
@@ -17,6 +26,7 @@ quickstart: # Deployment
         instance_name: quickstart-ec2
         ports: "22,3000"
     - name: quickstart-nodeapp
+      description: Use Ansible to deploy the application source code and get it running
       extension: Ansible
       source: git+https://github.com/lacework-dev/detc-resources
       tags: application
@@ -37,13 +47,13 @@ quickstart: # Deployment
           args:
             dst: "app_url"
             format: "http://{{ .inventory }}:3000"
-
       args:
         inventory: !lookup /quickstart-ec2/outputs/ip
         private_key: instance.pem
         galaxy:
           roles:
             - geerlingguy.nodejs
+            - weareinteractive.pm2
         user: "ubuntu"
         playbook: apps/quickstart-node/nodeapp.yml
         privilege_escalation:
