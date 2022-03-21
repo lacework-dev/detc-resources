@@ -22,7 +22,7 @@ source: # Where to get the code the underlying ext should run
 extension: # Core extension name/args to set.  These args are static vs the supplied ones above
   name: Terraform 
   args:
-    cloud: AWS
+    cloud: Azure
     outputs:
       - cluster_id
       - cluster_name
