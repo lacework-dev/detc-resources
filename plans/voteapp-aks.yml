@@ -1,0 +1,103 @@
+---
+VoteAppAKS:
+  steps:
+    - name: aks
+      extension: AKS
+      args:
+        deployment_name: testaks
+        azure_app_id: !secret azure.app_id
+        azure_password: !secret azure.password
+        azure_subscription_id: !secret azure.subscription_id
+        azure_tenant_id: !secret azure.tenant_id
+    - name: voteapp
+      extension: Kubectl
+      tags: applications
+      source: https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/voteapp.yml
+      needs:
+        - aks
+      helpers:
+        - helper: WriteValue
+          run_on_dryrun: true
+          args:
+            name: kubectl_config
+            dstfile: kubectl
+        - helper: GenerateOutput
+          lifecycle: [ afterCreate ]
+          args:
+            dst: "vote_app_url"
+            format: "http://{{ .vote }}"
+        - helper: GenerateOutput
+          lifecycle: [ afterCreate ]
+          args:
+            dst: "result_app_url"
+            format: "http://{{ .result }}"
+      lookup:
+        control_plane_url: /aks/outputs/cluster_endpoint
+        kubectl_config: /aks/outputs/kubectl_config
+      args:
+        kubectl_config_file: kubectl
+        kube_manifest_path: voteapp.yml
+        wait_for:
+           vote_app_url:
+              app_name: "vote"
+              field: "load_balancer_ip"
+           result_app_url:
+              app_name: "result"
+              field: "load_balancer_ip"
+    - name: lacework
+      extension: Kubectl
+      tags: monitoring
+      source:
+        location: https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/lacework-all-k8s.yaml
+        templates:
+          - "lacework-all-k8s.yaml"
+      needs:
+        - aks
+      helpers:
+        - helper: WriteValue
+          run_on_dryrun: true
+          args:
+            name: kubectl_config
+            dstfile: kubectl
+      lookup:
+        control_plane_url: /aks/outputs/cluster_endpoint
+        kubectl_config: /aks/outputs/kubectl_config
+      args:
+        lw_access_token: !secret lacework.access_token
+        kubectl_config_file: kubectl
+        kube_manifest_path: "lacework-all-k8s.yaml"
+    - name: instance
+      extension: AzureCompute
+      tags: infra
+      needs:
+        - voteapp
+      args:
+        region: !secret azure.region
+        instance_name: "vote-traffic"
+    - name: traffic
+      extension: Ansible
+      source: https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/traffic/install_traffic.yml
+      needs:
+        - instance
+      helpers:
+        - helper: ServiceAvailable
+          args:
+            max_wait: 60 # seconds
+            hostname: !lookup /instance/outputs/ip
+            port: 22
+        - helper: WriteValue
+          run_on_dryrun: true
+          args:
+            raw_value: !lookupSecret /instance/outputs/ssh_key
+            dstfile: instance.ssh_key
+            mode: 0600
+      args:
+        user: "ubuntu"
+        private_key: instance.ssh_key
+        inventory: !lookup /instance/outputs/ip
+        playbook: install_traffic.yml
+        privilege_escalation:
+          become: true
+        extra_vars:
+          vote_app_url: !lookup /voteapp/outputs/vote_app_url
+          result_app_url: !lookup /voteapp/outputs/result_app_url
