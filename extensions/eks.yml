@@ -27,3 +27,4 @@ extension: # Core extension name/args to set.  These args are static vs the supp
       - public_subnet_id
       - private_subnet_id
       - region
+      - cluster_worker_security_group_id
