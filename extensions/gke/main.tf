@@ -44,7 +44,7 @@ provider "google" {
 
 # GKE cluster
 resource "google_container_cluster" "primary" {
-  name     = "${var.cluster_name}"
+  name     = var.cluster_name
   location = var.region
 
   remove_default_node_pool = true
@@ -56,10 +56,10 @@ resource "google_container_cluster" "primary" {
 
 
 module "gke_auth" {
-  source               = "terraform-google-modules/kubernetes-engine/google//modules/auth"
+  source = "terraform-google-modules/kubernetes-engine/google//modules/auth"
 
-  project_id           = "${var.project}"
-  cluster_name         = "${var.cluster_name}"
+  project_id           = var.project
+  cluster_name         = var.cluster_name
   location             = var.region
   use_private_endpoint = true
 }
