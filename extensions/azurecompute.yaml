@@ -1,0 +1,20 @@
+---
+name: AzureCompute
+args:
+  instance_name:
+    type: string
+    required: true
+  region:
+    type: string
+    required: true
+    extension_arg: region
+source:
+  location: "git+https://github.com/lacework-dev/detc-resources.git"
+  subdir: "extensions/azurecompute"
+extension:
+  name: Terraform 
+  args:
+    cloud: Azure
+    outputs:
+      - ip
+      - ssh_key
