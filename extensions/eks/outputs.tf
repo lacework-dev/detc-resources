@@ -19,6 +19,11 @@ output "cluster_security_group_id" {
   value       = module.eks.cluster_security_group_id
 }
 
+output "cluster_worker_security_group_id" {
+  description = "Security group ids for EKS worker nodes"
+  value       = aws_security_group.all_worker_mgmt.id
+}
+
 output "kubectl_config" {
   description = "kubectl config file"
   value       = module.eks.kubeconfig
