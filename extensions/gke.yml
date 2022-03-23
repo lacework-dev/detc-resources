@@ -24,3 +24,5 @@ extension:
       - cluster_ca_certificate
       - token
       - cluster_name
+      - network
+      - subnet
