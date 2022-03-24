@@ -1,0 +1,29 @@
+kubernetes:
+  steps:
+    - name: k8s
+      extension: GKE
+      tags: infrastructure
+      args:
+        region: !secret gcp.region
+        project: !secret gcp.project_id
+        cluster_name: "sharedgke-k8-cluster"
+    - name: lacework
+      extension: Kubectl
+      description: This step deploys Lacework instrumentation to an existing K8s cluster
+      tags: monitoring
+      source:
+        location: "https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/lacework-all-k8s.yaml"
+        templates:
+          - "lacework-all-k8s.yaml"
+      needs:
+        - k8s
+      helpers:
+        - helper: GKEKubectl
+      lookup:
+        control_plane_url: /k8s/outputs/cluster_endpoint
+        kubectl_config: /k8s/outputs/kubectl_config
+      args:
+        cluster_name: !lookup /k8s/outputs/cluster_name
+        lw_access_token: !secret lacework.access_token
+        kubectl_config_file: kubectl
+        kube_manifest_path: "lacework-all-k8s.yaml"
