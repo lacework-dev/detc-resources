@@ -10,8 +10,19 @@ variable "instance_name" {
   description = "Instance name"
 }
 
+variable "tags" {
+  default = ""
+}
+
 provider "tls" {
 }
+
+
+locals {
+  split_tags = split(",", var.tags)
+  local_tags = compact(local.split_tags)
+}
+
 
 resource "tls_private_key" "ssh" {
   algorithm = "RSA"
@@ -39,9 +50,10 @@ resource "google_compute_address" "static" {
 }
 
 resource "google_compute_instance" "instance-server" {
-  name         = "${var.instance_name}"
+  name         = var.instance_name
   machine_type = "e2-small"
   zone         = "${var.region}-b"
+  tags         = local.local_tags
 
   boot_disk {
     initialize_params {
@@ -50,7 +62,7 @@ resource "google_compute_instance" "instance-server" {
   }
 
   metadata = {
-     ssh-keys = "ubuntu:${tls_private_key.ssh.public_key_openssh}"
+    ssh-keys = "ubuntu:${tls_private_key.ssh.public_key_openssh}"
   }
 
 
