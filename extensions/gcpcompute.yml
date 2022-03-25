@@ -7,11 +7,13 @@ args:
   region:
     type: string
     required: true
-    extension_arg: region
   project:
     type: string
     required: true
   tags:
+    type: string
+    required: false
+  instance_size:
     type: string
     required: false
 source:

@@ -14,6 +14,10 @@ variable "tags" {
   default = ""
 }
 
+variable "instance_size" {
+  default = "e2-small"
+}
+
 provider "tls" {
 }
 
@@ -51,7 +55,7 @@ resource "google_compute_address" "static" {
 
 resource "google_compute_instance" "instance-server" {
   name         = var.instance_name
-  machine_type = "e2-small"
+  machine_type = var.instance_size
   zone         = "${var.region}-b"
   tags         = local.local_tags
 
