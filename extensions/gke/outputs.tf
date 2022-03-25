@@ -12,24 +12,31 @@ output "cluster_name" {
 output "kubectl_config" {
   description = "kubectl config file"
   value       = module.gke_auth.kubeconfig_raw
-  sensitive = true
+  sensitive   = true
 }
 
 output "host" {
   description = "kubectl host"
   value       = module.gke_auth.host
-  sensitive = true
+  sensitive   = true
 }
 
 output "cluster_ca_certificate" {
   description = "kubectl cluster ca certificate"
   value       = module.gke_auth.cluster_ca_certificate
-  sensitive = true
+  sensitive   = true
 }
 
 output "token" {
   description = "kubectl token"
   value       = module.gke_auth.token
-  sensitive = true
+  sensitive   = true
 }
 
+output "network" {
+  value = google_compute_network.vpc.id
+}
+
+output "subnet" {
+  value = google_compute_subnetwork.subnet.id
+}
