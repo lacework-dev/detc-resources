@@ -50,7 +50,7 @@ provider "google" {
 }
 
 resource "google_compute_address" "static" {
-  name = "ipv4-address"
+  name = "${var.instance_name}-ipv4-address"
 }
 
 resource "google_compute_instance" "instance-server" {
