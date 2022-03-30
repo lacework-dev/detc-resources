@@ -1,12 +1,4 @@
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: lacework-config
-data:
-  config.json: |
-    {"tokens":{"AccessToken":"{{ index . "lw_access_token" }}"}, "tags":{"Env":"k8s"}, "serverurl":"https://api.lacework.net"}
----
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
