@@ -1,7 +1,7 @@
 ---
 VoteAppGKE:
   needs:
-    - kubernetes
+    - gcp-k8s
   steps:
     - name: voteapp
       extension: Kubectl
@@ -20,10 +20,10 @@ VoteAppGKE:
             dst: "result_app_url"
             format: "http://{{ .result }}"
       args:
-        kubectl_config: !lookup /kubernetes/k8s/outputs/kubectl_config
+        kubectl_config: !lookup /gcp-k8s/k8s/outputs/kubectl_config
         kubectl_config_file: "kubectl"
         kube_manifest_path: voteapp.yml
-        cluster_name: !lookup /kubernetes/k8s/outputs/cluster_name
+        cluster_name: !lookup /gcp-k8s/k8s/outputs/cluster_name
         wait_for:
           vote:
             resource_type: svc

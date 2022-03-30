@@ -3,7 +3,7 @@ bankofanthos:
     This plan will deploy the Bank of Anthos example application.  More details on that application can be read on the project page (https://github.com/GoogleCloudPlatform/bank-of-anthos).
         After deployment the url can be accessed from the `url` output of the `deploy-boa` step.
   needs:
-    - kubernetes
+    - gcp-k8s
   steps:
     - name: deploy-jwt
       description: "Create JWT secret for services"
@@ -14,7 +14,7 @@ bankofanthos:
       args:
         kubectl_config_file: kubectl
         kube_manifest_path: "extras/jwt/jwt-secret.yaml"
-        cluster_name: !lookup /kubernetes/k8s/outputs/cluster_name
+        cluster_name: !lookup /gcp-k8s/k8s/outputs/cluster_name
     - name: deploy-boa
       description: "Deploy all Bank of Anthos services to K8s"
       extension: Kubectl
@@ -30,9 +30,9 @@ bankofanthos:
             dst: app_url
             format: "http://{{ .url }}"
       args:
-        cluster_name: !lookup /kubernetes/k8s/outputs/cluster_name
+        cluster_name: !lookup /gcp-k8s/k8s/outputs/cluster_name
         kubectl_config_file: kubectl
-        kube_manifest_path: "kubernetes-manifests"
+        kube_manifest_path: "gcp-k8s-manifests"
         wait_for:
           url:
             resource_type: svc

@@ -1,7 +1,7 @@
 ---
 VoteAppAKS:
   needs:
-    - kubernetes
+    - azure-k8s
   steps:
     - name: voteapp
       extension: Kubectl
@@ -11,7 +11,7 @@ VoteAppAKS:
         - helper: WriteValue
           run_on_dryrun: true
           args:
-            raw_value: !lookup /kubernetes/k8s/outputs/kubectl_config
+            raw_value: !lookup /azure-k8s/k8s/outputs/kubectl_config
             dstfile: kubectl
         - helper: GenerateOutput
           lifecycle: [ afterCreate ]

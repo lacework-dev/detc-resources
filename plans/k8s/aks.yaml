@@ -1,5 +1,5 @@
 ---
-kubernetes:
+azure-k8s:
   steps:
     - name: k8s
       extension: AKS
@@ -30,4 +30,4 @@ kubernetes:
         lw_access_token: !secret lacework.access_token
         kubectl_config_file: kubectl
         kube_manifest_path: "."
-        cluster_name: "shared-aks"
+        cluster_name: sharedaks
