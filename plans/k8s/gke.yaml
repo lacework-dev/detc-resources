@@ -1,4 +1,4 @@
-kubernetes:
+gcp-k8s:
   steps:
     - name: k8s
       extension: GKE
@@ -6,7 +6,7 @@ kubernetes:
       args:
         region: !secret gcp.region
         project: !secret gcp.project_id
-        cluster_name: "sharedgke-k8-cluster"
+        cluster_name: sharedgke
     - name: lacework
       extension: Kubectl
       description: This step deploys Lacework instrumentation to an existing K8s cluster
@@ -24,4 +24,4 @@ kubernetes:
         lw_access_token: !secret lacework.access_token
         kubectl_config_file: kubectl
         kube_manifest_path: "."
-        cluster_name: "shared-gke"
+        cluster_name: sharedgke
