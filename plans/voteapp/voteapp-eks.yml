@@ -11,7 +11,7 @@ VoteAppEKS:
         - helper: WriteValue
           run_on_dryrun: true
           args:
-            name: kubectl_config
+            raw_value: !lookup /kubernetes/k8s/outputs/kubectl_config
             dstfile: kubectl
         - helper: GenerateOutput
           lifecycle: [ afterCreate ]
@@ -23,19 +23,18 @@ VoteAppEKS:
           args:
             dst: "result_app_url"
             format: "http://{{ .result }}"
-      lookup:
-        control_plane_url: /kubernetes/k8s/outputs/cluster_endpoint
-        kubectl_config: /kubernetes/k8s/outputs/kubectl_config
       args:
         kubectl_config_file: kubectl
         kube_manifest_path: voteapp.yml
         wait_for:
-           vote_app_url:
-              app_name: "vote"
-              field: "load_balancer_ip"
-           result_app_url:
-              app_name: "result"
-              field: "load_balancer_ip"
+          vote:
+            resource_type: svc
+            resource_name: vote
+            json_path: "{.status.loadBalancer.ingress[0].hostname}"
+          result:
+            resource_type: svc
+            resource_name: result
+            json_path: "{.status.loadBalancer.ingress[0].hostname}"
     - name: vpc
       extension: VPC.AWS
       tags: infrastructure
