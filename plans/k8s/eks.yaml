@@ -5,7 +5,7 @@ aws-k8s:
       extension: EKS
       description: This step uses the EKS extension (Terraform under the hood) to deploy the actual cluster. Expect runtimes in excess of 10 minutes
       args:
-        region: us-east-2
+        region: !secret aws.region
         deployment_name: sharedeks
     - name: lacework
       extension: Kubectl
