@@ -91,3 +91,7 @@ output "instance_id" {
 output "keypair" {
   value = aws_key_pair.server-key.id
 }
+
+output "private_ip" {
+  value = aws_instance.instance-server.private_ip
+}
