@@ -26,3 +26,4 @@ extension: # Core extension name/args to set.  These args are static vs the supp
       - sg_id
       - instance_id
       - keypair
+      - private_ip
