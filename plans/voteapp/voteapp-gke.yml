@@ -13,12 +13,12 @@ VoteAppGKE:
           lifecycle: [ afterCreate ]
           args:
             dst: "vote_app_url"
-            format: "http://{{ .vote }}"
+            format: "http://{{ .vote }}:{{ .vote_port }}"
         - helper: GenerateOutput
           lifecycle: [ afterCreate ]
           args:
             dst: "result_app_url"
-            format: "http://{{ .result }}"
+            format: "http://{{ .result }}:{{ .result_port }}"
       args:
         kubectl_config: !lookup /gcp-k8s/k8s/outputs/kubectl_config
         kubectl_config_file: "kubectl"
@@ -33,6 +33,14 @@ VoteAppGKE:
             resource_type: svc
             resource_name: result
             json_path: "{.status.loadBalancer.ingress[0].ip}"
+          vote_port:
+            resource_type: svc
+            resource_name: vote
+            json_path: "{.spec.ports[0].port}"
+          result_port:
+            resource_type: svc
+            resource_name: result
+            json_path: "{.spec.ports[0].port}"
     - name: instance
       extension: GCPCompute
       tags: infra

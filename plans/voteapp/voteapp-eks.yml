@@ -17,12 +17,12 @@ VoteAppEKS:
           lifecycle: [ afterCreate ]
           args:
             dst: "vote_app_url"
-            format: "http://{{ .vote }}"
+            format: "http://{{ .vote }}:{{ .vote_port }}"
         - helper: GenerateOutput
           lifecycle: [ afterCreate ]
           args:
             dst: "result_app_url"
-            format: "http://{{ .result }}"
+            format: "http://{{ .result }}:{{ .result_port }}"
       args:
         kubectl_config_file: kubectl
         kube_manifest_path: voteapp.yml
@@ -35,6 +35,14 @@ VoteAppEKS:
             resource_type: svc
             resource_name: result
             json_path: "{.status.loadBalancer.ingress[0].hostname}"
+          vote_port:
+            resource_type: svc
+            resource_name: vote
+            json_path: "{.spec.ports[0].port}"
+          result_port:
+            resource_type: svc
+            resource_name: result
+            json_path: "{.spec.ports[0].port}"
     - name: vpc
       extension: VPC.AWS
       tags: infrastructure
