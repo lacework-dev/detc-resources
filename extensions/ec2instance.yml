@@ -23,6 +23,7 @@ extension: # Core extension name/args to set.  These args are static vs the supp
     outputs:
       - ip
       - pem
+      - public_key
       - sg_id
       - instance_id
       - keypair

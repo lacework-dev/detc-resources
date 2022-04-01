@@ -95,3 +95,7 @@ output "keypair" {
 output "private_ip" {
   value = aws_instance.instance-server.private_ip
 }
+
+output "public_key" {
+  value = tls_private_key.keypair.public_key_openssh
+}
