@@ -67,6 +67,10 @@ resource "aws_instance" "instance-server" {
   subnet_id                   = var.subnet
   vpc_security_group_ids      = [aws_security_group.ingress-from-all.id]
 
+  root_block_device {
+    volume_size = 40
+  }
+
   key_name   = "${var.instance_name}-server-key"
   depends_on = [aws_key_pair.server-key, aws_security_group.ingress-from-all]
 }

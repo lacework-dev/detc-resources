@@ -1,0 +1,39 @@
+---
+- name: setup jenkins server
+  hosts: all
+  tasks:
+    - name: Update apt repo and cache on all Debian/Ubuntu boxes
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+      become: true
+    - name: Install Python pip
+      apt: name={{ item }} update_cache=true state=present force_apt_get=yes
+      become: true
+      with_items:
+        - python3-pip
+    - name: Install Python packages
+      pip: name={{ item }}
+      with_items:
+        - docker
+        - docker-compose
+      become: true
+    - name: Copy jenkins docker-compose.yml and supporting files into place
+      copy:
+        src: jenkins
+        dest: /usr/share
+    - name: deploy jenkins-server
+      environment:
+        JENKINS_ADMIN_ID: "{{ jenkins_admin_id }}"
+        JENKINS_ADMIN_PASSWORD: "{{ jenkins_admin_pass }}"
+        LW_ACCESS_ACCOUNT: "{{ lacework_account_name }}"
+        LW_ACCESS_TOKEN: "{{ lacework_access_token }}"
+        K8S_CLUSTER_NAME: "{{ k8s_cluster_name }}"
+        K8S_CONTEXT_NAME: "{{ k8s_context_name }}"
+        K8S_SERVER_URL: "{{ k8s_server_url }}"
+        K8S_BUILD_ROBOT_TOKEN: "{{ k8s_build_robot_token }}"
+        DOCKERHUB_ACCESS_TOKEN: "{{ dockerhub_access_token }}"
+        DOCKERHUB_ACCESS_USER: "{{ dockerhub_access_user }}"
+        JENKINS_AGENT_USER: "{{ agent_user }}"
+        JENKINS_AGENT_PRIV_KEY: "{{ agent_ssh_private_key }}"
+      docker_compose:
+        project_src: /usr/share/jenkins
+        

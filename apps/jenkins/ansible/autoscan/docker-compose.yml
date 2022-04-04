@@ -1,0 +1,18 @@
+version: "3.9"
+    
+services:
+  autoscanner:
+    image: alannix/container-auto-scan-inline:latest
+    restart: always
+    command: 
+      - -d
+      - --auto-integrate-inline-scanner
+      - --inline-scanner-only
+    volumes:
+     - /var/run/docker.sock:/var/run/docker.sock
+    privileged: true
+    environment:
+      LW_ACCOUNT:
+      LW_SUBACCOUNT:
+      LW_API_KEY:
+      LW_API_SECRET:

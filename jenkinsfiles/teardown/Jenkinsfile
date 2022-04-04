@@ -1,0 +1,28 @@
+pipeline {
+  agent { label 'agent' }
+  stages {
+    stage('teardown-all') {
+      when {
+        expression {
+          input message: "Really, teardown all apps?"
+          return true
+        }
+      }
+
+      steps {
+        sh '''
+          detc destroy \
+          --plan https://raw.githubusercontent.com/lacework-dev/detc-resources/main/plans/voteapp/voteapp-eks.yml \
+          --plan https://raw.githubusercontent.com/lacework-demo/unhackable-ecommerce-app/main/deploy/ecommerce-aks.yaml \
+          --plan https://raw.githubusercontent.com/lacework-demo/ticketing-app/main/deploy/ticketing-gcp.yaml \
+          --plan https://raw.githubusercontent.com/lacework-dev/detc-resources/main/plans/k8s/aks.yaml \
+          --plan https://raw.githubusercontent.com/lacework-dev/detc-resources/main/plans/k8s/eks.yaml \
+          --plan https://raw.githubusercontent.com/lacework-dev/detc-resources/main/plans/k8s/gke.yaml \
+          --trace \
+          --apply
+       '''
+      }
+    }
+  }
+}
+

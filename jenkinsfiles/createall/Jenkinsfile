@@ -1,0 +1,22 @@
+pipeline {
+  agent { label 'agent' }
+  stages {
+    stage('create-all') {
+      when {
+        expression {
+          input message: "Really, create all apps?"
+          return true
+        }
+      }
+      steps{
+        build 'aks infrastructure'
+        build 'eks infrastructure'
+        build 'gke infrastructure'
+        build 'ecomm'
+        build 'ticketing-app'
+        build 'voteapp'
+      }
+    }
+  }
+}
+

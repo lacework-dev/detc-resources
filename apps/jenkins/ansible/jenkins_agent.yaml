@@ -1,0 +1,41 @@
+- name: "Install jenkins-agent"
+  hosts: all
+
+  tasks:
+    - name: installing repo for Java 8 in Ubuntu
+      apt_repository: repo='ppa:openjdk-r/ppa'
+
+  vars:
+    master_host: "{{ jenkins_server_url }}"
+    master_user: "{{ jenkins_admin_id }}"
+    master_password:  "{{ jenkins_admin_pass }}"
+    slave_linux_jenkins_cred_id: "jenkins-agents"
+    slave_linux_jenkins_username: "{{ slave_linux_jenkins_username }}"
+    slave_linux_jenkins_group: "docker"
+    slave_linux_jenkins_public_key: "{{ jenkins_agent_pub_key }}"
+    slave_executors_num: 2
+
+  roles:
+    - role: geerlingguy.java
+      when: "ansible_os_family == 'Debian'"
+      java_packages:
+        - openjdk-11-jdk
+    - role: lean_delivery.jenkins_slave
+
+- name: "Setup DETC Tool"
+  hosts: all
+  tasks:
+    - name: create gcp auth file
+      copy:
+        dest: "/home/{{ slave_linux_jenkins_username }}/.gcp.json"
+        content: "{{ gcp_service_account_file_content }}"
+
+    - name: create detc config
+      template:
+        src: templates/detc.toml.j2
+        dest: "/home/{{ slave_linux_jenkins_username }}/.detc.toml"
+        mode: 0755
+        owner: "{{ slave_linux_jenkins_username }}"
+
+    - name: install detc
+      shell: 'curl https://detc-artifacts.s3.amazonaws.com/install.sh | bash'
