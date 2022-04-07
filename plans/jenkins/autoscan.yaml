@@ -1,0 +1,36 @@
+---
+autoscanner:
+  needs:
+    - jenkins
+  steps:
+    - name: setup-autoscanner
+      extension: Ansible
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "apps/jenkins/ansible"
+      tags: autoscan
+      lookup:
+      helpers:
+        - helper: ServiceAvailable
+          args:
+            max_wait: 60 # seconds
+            lookup_hostname: inventory
+            port: 22
+        - helper: WriteValue
+          args:
+            raw_value: !lookupSecret /jenkins/jenkins-server/outputs/pem
+            dstfile: instance.pem
+            mode: 0600
+      args:
+        private_key: instance.pem
+        user: "ubuntu"
+        privilege_escalation:
+          become: true
+        playbook:
+          - autoscan.yml
+        inventory: !lookup /jenkins/jenkins-server/outputs/ip
+        extra_vars:
+          lacework_account_name: !secret lacework.account_name
+          lacework_subaccount_name: !secret lacework.subaccount_name
+          lacework_api_key: !secret lacework.api_key
+          lacework_api_secret: !secret lacework.api_secret

@@ -1,0 +1,31 @@
+---
+- name: setup autoscanner
+  hosts: all
+  tasks:
+    - name: Update apt repo and cache on all Debian/Ubuntu boxes
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+      become: true
+    - name: Install Python pip
+      apt: name={{ item }} update_cache=true state=present force_apt_get=yes
+      become: true
+      with_items:
+        - python3-pip
+    - name: Install Python packages
+      pip: name={{ item }}
+      with_items:
+        - docker
+        - docker-compose
+      become: true
+    - name: Copy autoscanner docker-compose.yml into place
+      copy:
+        src: autoscan
+        dest: /usr/share
+    - name: deploy autoscanner
+      environment:
+        LW_ACCOUNT: "{{ lacework_account_name }}"
+        LW_SUBACCOUNT: "{{ lacework_subaccount_name }}"
+        LW_API_KEY: "{{ lacework_api_key }}"
+        LW_API_SECRET: "{{ lacework_api_secret }}"
+      docker_compose:
+        project_src: /usr/share/autoscan
+        

@@ -1,0 +1,23 @@
+permit-unsupported-docker = true
+
+[aws]
+access_key = "{{ aws_access_key }}"
+secret_key = "{{ aws_secret_key }}"
+region = "{{ aws_region }}"
+
+[gcp]
+service_account_email = "{{ gcp_service_account_email }}"
+service_account_file = "/home/{{ slave_linux_jenkins_username }}/.gcp.json"
+
+project_id = "{{ gcp_project_id }}"
+region = "{{ gcp_region }}"
+
+[azure]
+region = "{{ azure_region }}"
+app_id = "{{ azure_app_id }}"
+password = "{{ azure_password }}"
+tenant_id = "{{ azure_tenant_id }}"
+subscription_id = "{{ azure_subscription_id }}"
+
+[lacework]
+access_token = "{{ lacework_access_token }}"

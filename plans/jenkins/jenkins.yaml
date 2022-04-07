@@ -1,0 +1,169 @@
+---
+jenkins:
+  steps:
+    - name: jenkins-vpc
+      extension: VPC.AWS
+      tags: infrastructure
+      args:
+        name: "jenkins-vpc"
+    - name: jenkins-server
+      extension: EC2Instance
+      tags: infra
+      helpers:
+        - helper: GenerateOutput
+          run_on_dryrun: true
+          lifecycle:
+            - afterCreate
+          args:
+            dst: jenkins_url
+            format: "http://{{ .ip }}:8080"
+      needs:
+        - jenkins-vpc
+      args:
+        vpc_id: !lookup /jenkins-vpc/outputs/vpc_id
+        subnet: !lookup /jenkins-vpc/outputs/subnet_id1
+        instance_name: "jenkins"
+    - name: jenkins-agent
+      extension: EC2Instance
+      tags: infra
+      needs:
+        - jenkins-vpc
+      args:
+        vpc_id: !lookup /jenkins-vpc/outputs/vpc_id
+        subnet: !lookup /jenkins-vpc/outputs/subnet_id1
+        instance_name: "jenkins-agent"
+    - name: jenkins-server-security-group
+      extension: Terraform
+      needs:
+        - jenkins-server
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "apps/jenkins/terraform/aws"
+      args:
+        cloud: aws
+        outputs:
+          - aws_secret_key
+          - aws_access_key
+        tfvars:
+          vpc_id: !lookup /jenkins-vpc/outputs/vpc_id
+          agent_sg_id: !lookup /jenkins-agent/outputs/sg_id
+          server_sg_id: !lookup /jenkins-server/outputs/sg_id
+    - name: jenkins-service-account-gcp
+      extension: Terraform
+      needs:
+        - jenkins-server
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "apps/jenkins/terraform/gcp"
+      args:
+        outputs:
+          - credentials
+          - email
+        cloud: gcp
+    - name: install-jenkins-server
+      extension: Ansible
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "apps/jenkins/ansible"
+      tags: jenkins
+      needs:
+        - jenkins-server-security-group
+        - jenkins-server
+      lookup:
+      helpers:
+        - helper: ServiceAvailable
+          args:
+            max_wait: 60 # seconds
+            lookup_hostname: inventory
+            port: 22
+        - helper: WriteValue
+          #run_on_dryrun: true
+          args:
+            raw_value: !lookupSecret /jenkins-server/outputs/pem
+            dstfile: instance.pem
+            mode: 0600
+      args:
+        private_key: instance.pem
+        user: "ubuntu"
+        playbook:
+          - docker.yml
+          - jenkins.yml
+          - lacework.yml
+        privilege_escalation:
+          become: true
+        inventory: !lookup /jenkins-server/outputs/ip
+        extra_vars:
+          lacework_access_token: !secret lacework.access_token
+          lacework_account_name: !secret lacework.account_name
+          jenkins_admin_id: !secret jenkins.admin_id
+          jenkins_admin_pass: !secret jenkins.admin_pass
+          dockerhub_access_token: !secret dockerhub.token
+          dockerhub_access_user: !secret dockerhub.user
+          source_private_key: !lookupSecret /jenkins-server/outputs/pem
+          k8s_cluster_name: !lookup /jenkins-server/outputs/ip
+          k8s_context_name: !lookup /jenkins-server/outputs/ip
+          k8s_build_robot_token: !lookupSecret /jenkins-server/outputs/ip
+          k8s_server_url: !lookup /jenkins-server/outputs/ip
+          agent_user: "ubuntu"
+          agent_ssh_private_key: !lookupSecret /jenkins-agent/outputs/pem
+    - name: install-jenkins-agent
+      extension: Ansible
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "apps/jenkins/ansible"
+      tags: jenkins
+      needs:
+        - jenkins-server-security-group
+        - install-jenkins-server
+        - jenkins-service-account-gcp
+        # - jenkins-service-account-azure
+      lookup:
+      helpers:
+        - helper: ServiceAvailable
+          args:
+            max_wait: 60 # seconds
+            lookup_hostname: inventory
+            port: 22
+        - helper: WriteValue
+          args:
+            raw_value: !lookupSecret /jenkins-agent/outputs/pem
+            dstfile: instance.pem
+            mode: 0600
+      args:
+        private_key: instance.pem
+        galaxy:
+          roles:
+            - geerlingguy.java
+            - lean_delivery.jenkins_slave
+        user: "ubuntu"
+        privilege_escalation:
+          become: true
+        playbook:
+          - docker.yml
+          - jenkins_agent.yaml
+          - lacework.yml
+        inventory: !lookup /jenkins-agent/outputs/ip
+        extra_vars:
+          jenkins_server_url: !lookup /jenkins-server/outputs/ip
+          jenkins_admin_id: !secret jenkins.admin_id
+          jenkins_admin_pass: !secret jenkins.admin_pass
+          jenkins_agent_pub_key: !lookupSecret /jenkins-agent/outputs/public_key
+          slave_linux_jenkins_username: ubuntu
+          slave_linux_user_group: ubuntu
+          slave_linux_jenkins_public_key: !lookupSecret /jenkins-agent/outputs/public_key
+          lacework_access_token: !secret lacework.access_token
+
+          aws_access_key: !lookupSecret /jenkins-server-security-group/outputs/aws_access_key
+          aws_secret_key: !lookupSecret /jenkins-server-security-group/outputs/aws_secret_key
+          aws_region: !secret aws.region
+
+          gcp_service_account_email: !lookupSecret /jenkins-service-account-gcp/outputs/email
+          gcp_service_account_file_content: !lookupSecret /jenkins-service-account-gcp/outputs/credentials
+          gcp_region: !secret gcp.region
+          gcp_project_id: !secret gcp.project_id
+
+          azure_region: !secret azure.region
+          azure_app_id: !secret azure.app_id
+          azure_password: !secret azure.password
+          azure_tenant_id: !secret azure.tenant_id
+          azure_subscription_id: !secret azure.subscription_id
