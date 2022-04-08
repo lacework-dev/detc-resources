@@ -1,0 +1,21 @@
+#!/bin/bash
+exec > /var/tmp/tf.log
+exec 2>&1
+
+cd /usr/share/tf
+export PATH=PATH:/usr/local/bin
+
+{% for cred in cred_data %}
+# {{ cred.key }}
+export TF_VAR_client_id="{{ cred.value.client_id }}"
+export TF_VAR_client_secret="{{ cred.value.client_secret }}"
+export TF_VAR_tenant_id="{{ cred.value.tenant_id }}"
+export TF_VAR_subscription="{{ cred.value.sub_id }}"
+
+TF_VAR_address_prefix="10.0.1.0/24" terraform apply -auto-approve
+TF_VAR_address_prefix="10.0.2.0/24" terraform apply -auto-approve
+TF_VAR_address_prefix="10.0.2.0/24" terraform destroy -auto-approve
+
+unset TF_VAR_subscription TF_VAR_client_secret TF_VAR_client_id TF_VAR_tenant_id
+
+{% endfor %}

@@ -1,0 +1,57 @@
+---
+activity-gcp:
+  steps:
+    - name: activity
+      extension: Terraform
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "apps/activity/terraform/gcp"
+      args:
+        cloud: gcp
+        project: !secret gcp.project_id
+        outputs:
+          - creds
+    - name: activity-generator
+      extension: GCPCompute
+      tags: infra
+      needs:
+        - activity
+      args:
+        region: !secret gcp.region
+        project: !secret gcp.project_id
+        instance_name: "activity-generator"
+        tags: "activity-generator"
+    - name: setup-activity-generation
+      extension: Ansible
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "apps/activity/ansible/gcp"
+      needs:
+        - activity-generator
+      helpers:
+        - helper: ServiceAvailable
+          args:
+            max_wait: 60 # seconds
+            hostname: !lookup /activity-generator/outputs/ip
+            port: 22
+        - helper: WriteValue
+          run_on_dryrun: true
+          args:
+            raw_value: !lookupSecret /activity-generator/outputs/ssh_key
+            dstfile: instance.ssh_key
+            mode: 0600
+      args:
+        galaxy:
+          roles:
+            - diodonfrost.terraform
+        user: "ubuntu"
+        private_key: instance.ssh_key
+        inventory: !lookup /activity-generator/outputs/ip
+        playbook: setup.yml
+        privilege_escalation:
+          become: true
+        extra_vars:
+          ansible_user: ubuntu
+          gcp_creds: !lookupSecret /activity/outputs/creds
+          gcp_project_id: !secret gcp.project_id
+

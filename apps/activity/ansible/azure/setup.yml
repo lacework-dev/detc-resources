@@ -1,0 +1,52 @@
+- hosts: all
+  become: true
+  tasks:
+  - name: Update apt packages
+    apt:
+      update_cache: "yes"
+      force_apt_get: "yes"
+
+  - name: Install packages needed
+    apt:
+      name: "unzip"
+      state: present
+
+- hosts: all
+  become: true
+  vars:
+    cred_data: "{{ azure_creds | from_json | dict2items }}"
+  roles:
+  - role: diodonfrost.terraform
+
+  tasks:
+  - name: Create TF Directory
+    file: path=/usr/share/tf state=directory owner=ubuntu
+
+  - name: copy source tf
+    become_user: "{{ ansible_user }}"
+    copy:
+      src: main.tf.demo.source
+      dest: /usr/share/tf/main.tf
+
+  - name: tf init
+    become_user: "{{ ansible_user }}"
+    command:
+      argv:
+        - terraform
+        - init
+      chdir: /usr/share/tf
+
+  - name: write script
+    template:
+      src: run.j2
+      dest: "/usr/share/tf/run.sh"
+      mode: 0755
+    become_user: "{{ ansible_user }}"
+    no_log: true
+
+  - name: run the curl
+    become_user: "{{ ansible_user }}"
+    ansible.builtin.cron:
+      name: "activity-generator"
+      minute: "*/15"
+      job: "/usr/share/tf/run.sh"
