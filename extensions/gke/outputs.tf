@@ -1,7 +1,8 @@
 
 output "cluster_endpoint" {
   description = "GKE cluster endpoint for control plane"
-  value       = "https://${google_container_cluster.primary.endpoint}"
+  value       = "https://${module.gke.endpoint}"
+  sensitive   = true
 }
 
 output "cluster_name" {
@@ -34,9 +35,9 @@ output "token" {
 }
 
 output "network" {
-  value = google_compute_network.vpc.id
+  value = module.vpc.network_id
 }
 
 output "subnet" {
-  value = google_compute_subnetwork.subnet.id
+  value = module.vpc.subnets_ids[0]
 }
