@@ -29,7 +29,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "4.16.0"
+      version = "4.24.0"
     }
   }
 
@@ -41,64 +41,55 @@ provider "google" {
   region  = var.region
 }
 
+module "gke" {
+  source                 = "terraform-google-modules/kubernetes-engine/google"
+  project_id             = var.project
+  name                   = var.cluster_name
+  region                 = var.region
 
-# GKE cluster
-resource "google_container_cluster" "primary" {
-  name     = var.cluster_name
-  location = var.region
+  network                = "${var.project}-vpc"
+  subnetwork             = module.vpc.subnets_names[0]
+  ip_range_pods          = "${var.project}-ip-range-pods-name"
+  ip_range_services      = "${var.project}-ip-range-services-name"
 
-  remove_default_node_pool = true
-  initial_node_count       = 1
-
-  network    = google_compute_network.vpc.name
-  subnetwork = google_compute_subnetwork.subnet.name
+  skip_provisioners      = true
 }
 
+module "vpc" {
+  source  = "terraform-google-modules/network/google"
+  version = "~> 4.0"
 
-module "gke_auth" {
-  source = "terraform-google-modules/kubernetes-engine/google//modules/auth"
+  project_id   = var.project
+  network_name = "${var.project}-vpc"
 
-  project_id           = var.project
-  cluster_name         = var.cluster_name
-  location             = var.region
-  use_private_endpoint = true
-}
+  subnets = [
+    {
+      subnet_name   = "${var.project}-subnetwork"
+      subnet_ip     = "10.0.0.0/17"
+      subnet_region = var.region
+    }
+  ]
 
-resource "google_container_node_pool" "primary_nodes" {
-  name       = "${google_container_cluster.primary.name}-node-pool"
-  location   = var.region
-  cluster    = google_container_cluster.primary.name
-  node_count = var.gke_node_count
-
-  node_config {
-    image_type = "ubuntu"
-
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/logging.write",
-      "https://www.googleapis.com/auth/monitoring",
+  secondary_ranges = {
+    ("${var.project}-subnetwork") = [
+      {
+        range_name    = "${var.project}-ip-range-pods-name"
+        ip_cidr_range = "192.168.0.0/18"
+      },
+      {
+        range_name    = "${var.project}-ip-range-services-name"
+        ip_cidr_range = "192.168.64.0/18"
+      }
     ]
-
-    labels = {
-      env = var.project
-    }
-
-    # preemptible  = true
-    machine_type = "n1-standard-1"
-    tags         = ["gke-node", "${var.project}-gke"]
-    metadata = {
-      disable-legacy-endpoints = "true"
-    }
   }
 }
 
-resource "google_compute_network" "vpc" {
-  name                    = "${var.project}-vpc"
-  auto_create_subnetworks = "false"
-}
+module "gke_auth" {
+  source = "terraform-google-modules/kubernetes-engine/google//modules/auth"
+  depends_on = [module.gke]
 
-resource "google_compute_subnetwork" "subnet" {
-  name          = "${var.project}-subnet"
-  region        = var.region
-  network       = google_compute_network.vpc.name
-  ip_cidr_range = "10.10.0.0/24"
+  project_id           = var.project
+  cluster_name         = var.cluster_name
+  location             = module.gke.location
+  use_private_endpoint = false
 }

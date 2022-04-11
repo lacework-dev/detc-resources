@@ -10,7 +10,11 @@ bankofanthos:
       extension: Kubectl
       source: "git+https://github.com/GoogleCloudPlatform/bank-of-anthos.git"
       helpers:
-        - helper: GKEKubectl
+        - helper: WriteValue
+          run_on_dryrun: true
+          args:
+            raw_value: !lookup /gcp-k8s/k8s/outputs/kubectl_config
+            dstfile: kubectl
       args:
         kubectl_config_file: kubectl
         kube_manifest_path: "extras/jwt/jwt-secret.yaml"
@@ -22,7 +26,11 @@ bankofanthos:
       needs:
         - deploy-jwt
       helpers:
-        - helper: GKEKubectl
+        - helper: WriteValue
+          run_on_dryrun: true
+          args:
+            raw_value: !lookup /gcp-k8s/k8s/outputs/kubectl_config
+            dstfile: kubectl
         - helper: GenerateOutput
           lifecycle: [afterCreate]
           run_on_dryrun: false
@@ -32,7 +40,7 @@ bankofanthos:
       args:
         cluster_name: !lookup /gcp-k8s/k8s/outputs/cluster_name
         kubectl_config_file: kubectl
-        kube_manifest_path: "gcp-k8s-manifests"
+        kube_manifest_path: "kubernetes-manifests"
         wait_for:
           url:
             resource_type: svc

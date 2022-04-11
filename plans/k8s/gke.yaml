@@ -7,6 +7,9 @@ gcp-k8s:
         region: !secret gcp.region
         project: !secret gcp.project_id
         cluster_name: sharedgke
+      helpers:
+        - helper: GKEKubectl
+          lifecycle: [ afterCreate ]
     - name: lacework
       extension: Kubectl
       description: This step deploys Lacework instrumentation to an existing K8s cluster
@@ -19,7 +22,11 @@ gcp-k8s:
       needs:
         - k8s
       helpers:
-        - helper: GKEKubectl
+        - helper: WriteValue
+          run_on_dryrun: true
+          args:
+            raw_value: !lookup /gcp-k8s/k8s/outputs/kubectl_config
+            dstfile: kubectl
       args:
         lw_access_token: !secret lacework.access_token
         kubectl_config_file: kubectl
