@@ -103,7 +103,6 @@ spec:
   resources:
     requests:
       storage: 1Gi
-result
 ---
 apiVersion: v1
 kind: Service
