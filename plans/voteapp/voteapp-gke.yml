@@ -27,19 +27,19 @@ VoteAppGKE:
         wait_for:
           vote:
             resource_type: svc
-            resource_name: vote
+            resource_name: voteapp-vote
             json_path: "{.status.loadBalancer.ingress[0].ip}"
           result:
             resource_type: svc
-            resource_name: result
+            resource_name: voteapp-result
             json_path: "{.status.loadBalancer.ingress[0].ip}"
           vote_port:
             resource_type: svc
-            resource_name: vote
+            resource_name: voteapp-vote
             json_path: "{.spec.ports[0].port}"
           result_port:
             resource_type: svc
-            resource_name: result
+            resource_name: voteapp-result
             json_path: "{.spec.ports[0].port}"
     - name: instance
       extension: GCPCompute
