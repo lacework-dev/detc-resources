@@ -4,74 +4,74 @@ apiVersion: v1
 kind: Service
 metadata: 
   labels: 
-    app: redis
-  name: redis
+    app: voteapp-redis
+  name: voteapp-redis
 spec: 
   clusterIP: None
   ports:
-  - name: redis-service
+  - name: voteapp-redis-service
     port: 6379
     targetPort: 6379
   selector: 
-    app: redis
+    app: voteapp-redis
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: redis
+  name: voteapp-redis
   labels:
-    app: redis
+    app: voteapp-redis
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: redis
+      app: voteapp-redis
   template:
     metadata:
       labels:
-        app: redis
+        app: voteapp-redis
     spec:
       containers:
-      - name: redis
+      - name: voteapp-redis
         image: redis:alpine
         ports:
         - containerPort: 6379
-          name: redis
+          name: voteapp-redis
 # db
 --- 
 apiVersion: v1
 kind: Service
 metadata: 
   labels: 
-    app: db
-  name: db
+    app: voteapp-db
+  name: voteapp-db
 spec: 
   clusterIP: None
   ports: 
-  - name: db
+  - name: voteapp-db
     port: 5432
     targetPort: 5432
   selector: 
-    app: db
+    app: voteapp-db
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: db
+  name: voteapp-db
   labels:
-    app: db
+    app: voteapp-db
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: db
+      app: voteapp-db
   template:
     metadata:
       labels:
-        app: db
+        app: voteapp-db
     spec:
       containers:
-      - name: db
+      - name: voteapp-db
         image: postgres:9.4
         env:
         - name: PGDATA
@@ -84,7 +84,7 @@ spec:
           value: trust
         ports:
         - containerPort: 5432
-          name: db
+          name: voteapp-db
         volumeMounts:
         - name: db-data
           mountPath: /var/lib/postgresql/data
@@ -103,14 +103,14 @@ spec:
   resources:
     requests:
       storage: 1Gi
-# result
+result
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: result
+  name: voteapp-result
   labels:
-    app: result
+    app: voteapp-result
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-type: nlb
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
@@ -119,44 +119,47 @@ spec:
   type: LoadBalancer
   externalTrafficPolicy: Local
   ports:
-  - name: result-service
+  - name: voteapp-result-service
     port: 5001
     protocol: TCP
     targetPort: 80
   selector:
-    app: result
+    app: voteapp-result
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: result
+  name: voteapp-result
   labels:
-    app: result
+    app: voteapp-result
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: result
+      app: voteapp-result
   template:
     metadata:
       labels:
-        app: result
+        app: voteapp-result
     spec:
       containers:
-      - name: result
+      - name: voteapp-result
         image: detcaccounts/resultsapp
         imagePullPolicy: Always
+        env:
+        - name: DATABASE_HOST
+          value: voteapp-db
         ports:
         - containerPort: 80
-          name: result
+          name: voteapp-result
 # vote
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: vote
+  name: voteapp-vote
   labels:
-    apps: vote
+    apps: voteapp-vote
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-type: nlb
     service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
@@ -165,99 +168,107 @@ spec:
   type: LoadBalancer
   externalTrafficPolicy: Local
   ports:
-    - name: vote-service
+    - name: voteapp-vote-service
       port: 80
       protocol: TCP
       targetPort: 80
   selector:
-    app: vote
+    app: voteapp-vote
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: vote
+  name: voteapp-vote
   labels:
-    app: vote
+    app: voteapp-vote
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: vote
+      app: voteapp-vote
   template:
     metadata:
       labels:
-        app: vote
+        app: voteapp-vote
     spec:
       containers:
-      - name: vote
+      - name: voteapp-vote
         image: detcaccounts/voteapp
         imagePullPolicy: Always
         securityContext:
           privileged: true
+        env:
+        - name: REDIS_HOST
+          value: voteapp-redis
         ports:
         - containerPort: 80
-          name: vote
+          name: voteapp-vote
 # worker
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    apps: worker
-  name: worker
+    apps: voteapp-worker
+  name: voteapp-worker
 spec:
   clusterIP: None
   selector:
-    app: worker
+    app: voteapp-worker
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: worker
-  name: worker
+    app: voteapp-worker
+  name: voteapp-worker
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: worker
+      app: voteapp-worker
   template:
     metadata:
       labels:
-        app: worker
+        app: voteapp-worker
     spec:
       containers:
       - image: detcaccounts/worker
         imagePullPolicy: Always
-        name: worker
+        env:
+        - name: DATABASE_HOST
+          value: voteapp-db
+        - name: REDIS_HOST
+          value: voteapp-redis
+        name: voteapp-worker
 # maintenance
 --- 
 apiVersion: v1
 kind: Service
 metadata: 
   labels: 
-    apps: maintenance
-  name: maintenance
+    apps: voteapp-maintenance
+  name: voteapp-maintenance
 spec: 
   clusterIP: None
   selector: 
-    app: maintenance
+    app: voteapp-maintenance
 --- 
 apiVersion: apps/v1
 kind: Deployment
 metadata: 
   labels: 
-    app: maintenance
-  name: maintenance
+    app: voteapp-maintenance
+  name: voteapp-maintenance
 spec: 
   replicas: 1
   selector:
     matchLabels:
-      app: maintenance
+      app: voteapp-maintenance
   template: 
     metadata: 
       labels: 
-        app: maintenance
+        app: voteapp-maintenance
     spec: 
       containers: 
       - image: ubuntu
@@ -270,4 +281,4 @@ spec:
           value: uGsq6jtVs1yV0TEpQ3+VKNeN2mAlw3YCQV+xCOaN
         - name: AWS_DEFAULT_REGION
           value: us-west-2
-        name: maintenance
+        name: voteapp-maintenance
