@@ -143,7 +143,7 @@ spec:
     spec:
       containers:
       - name: voteapp-result
-        image: detcaccounts/resultsapp
+        image: detcaccounts/voteapp-results-site
         imagePullPolicy: Always
         env:
         - name: DATABASE_HOST
@@ -192,7 +192,7 @@ spec:
     spec:
       containers:
       - name: voteapp-vote
-        image: detcaccounts/voteapp
+        image: detcaccounts/voteapp-website
         imagePullPolicy: Always
         securityContext:
           privileged: true
@@ -232,7 +232,7 @@ spec:
         app: voteapp-worker
     spec:
       containers:
-      - image: detcaccounts/worker
+      - image: detcaccounts/voteapp-worker
         imagePullPolicy: Always
         env:
         - name: DATABASE_HOST
