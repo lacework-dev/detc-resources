@@ -9,6 +9,7 @@ azure-k8s:
         azure_password: !secret azure.password
         azure_subscription_id: !secret azure.subscription_id
         azure_tenant_id: !secret azure.tenant_id
+        azure_location: !secret azure.region
     - name: lacework
       extension: Kubectl
       description: This step deploys Lacework instrumentation to an existing K8s cluster

@@ -13,6 +13,9 @@ args:
   azure_tenant_id:
     type: string
     required: true
+  azure_location:
+    type: string
+    required: true
   deployment_name:
     type: string
     required: true

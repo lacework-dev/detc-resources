@@ -2,6 +2,10 @@ variable "azure_app_id" {
   description = "Azure app ID"
 }
 
+variable "azure_location" {
+  description = "Default Azure location"
+}
+
 variable "azure_subscription_id" {
   description = "Azure subscription ID"
 }
@@ -44,7 +48,7 @@ provider "azurerm" {
 
 resource "azurerm_resource_group" "default" {
   name     = "${local.cluster_name}-rg"
-  location = "West US 2"
+  location = var.azure_location
 
   tags = {
     environment = var.deployment_name
