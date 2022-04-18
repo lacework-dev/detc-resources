@@ -1,39 +1,122 @@
 ---
 - name: setup jenkins server
   hosts: all
+
+  vars:
+    jenkins2_permissive_script_enabled: true
+    jenkins2_configure_by_groovy: false
+    jenkins2_configure_by_casc: true
+    jenkins2_plugins_suggested:
+      - ant
+      - antisamy-markup-formatter
+      - authorize-project
+      - build-timeout
+      - cloudbees-folder
+      - configuration-as-code
+      - job-dsl
+      - credentials-binding
+      - email-ext
+      - git
+      - github-branch-source
+      - gradle
+      - ldap
+      - mailer
+      - matrix-auth
+      - pam-auth
+      - pipeline-github-lib
+      - pipeline-stage-view
+      - ssh-slaves
+      - ssh-agent
+      - timestamper
+      - workflow-aggregator
+      - ws-cleanup
+      - kubernetes-cli
+      - docker-workflow
+      - warnings-ng
+      - permissive-script-security
+
+    jenkins2_jcasc_config:
+      credentials:
+        system:
+          domainCredentials:
+            - credentials:
+              - basicSSHUserPrivateKey:
+                  id: "jenkins-agents"
+                  scope: GLOBAL
+                  username: "{{ agent_user }}"
+                  privateKeySource:
+                    directEntry:
+                      privateKey: |
+                        "{{ agent_ssh_private_key | regex_replace('\"') }}"
+              - usernamePassword:
+                  id: "dockerhub-access-token"
+                  username: "{{ dockerhub_access_user }}"
+                  password: "{{ dockerhub_access_token }}"
+              - string:
+                  id: "lw-access-token"
+                  secret: "{{ lacework_access_token }}"
+                  description: "lw access token"
+              - string:
+                  id: "lw-account-name"
+                  secret: "{{ lacework_account_name }}"
+                  description: "lw account name"
+              - string:
+                  id: "k8s-cluster-name"
+                  secret: "{{ k8s_cluster_name }}"
+              - string:
+                  id: "k8s-context-name"
+                  secret: "{{ k8s_context_name }}"
+              - string:
+                  id: "k8s-server-url"
+                  secret: "{{ k8s_server_url }}"
+              - string:
+                  id: "k8s-build-robot-token"
+                  secret: "{{ k8s_build_robot_token }}"
+      jenkins:
+        securityRealm:
+          local:
+            allowsSignup: false
+            users:
+             - id: "{{ jenkins_admin_id }}"
+               password: "{{ jenkins_admin_pass }}"
+        authorizationStrategy:
+          globalMatrix:
+            permissions:
+              - "Overall/Administer:admin"
+              - "Overall/Read:authenticated"
+      security:
+        queueItemAuthenticator:
+          authenticators:
+          - global:
+              strategy: "triggeringUsersAuthorizationStrategy"
+      unclassified:
+        location:
+          url: http://${SERVER}:8080/
+      jobs:
+        - script: >
+            job('Job_DSL_Seed') {
+              scm {
+                git {
+                  remote {
+                    url 'https://github.com/lacework-dev/detc-resources.git'
+                  }
+                }
+              }
+              steps {
+                jobDsl {
+                  targets 'apps/jenkins/job-seeds/**/*.groovy'
+                }
+              }
+            }
+
   tasks:
     - name: Update apt repo and cache on all Debian/Ubuntu boxes
       apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
       become: true
-    - name: Install Python pip
-      apt: name={{ item }} update_cache=true state=present force_apt_get=yes
-      become: true
-      with_items:
-        - python3-pip
-    - name: Install Python packages
-      pip: name={{ item }}
-      with_items:
-        - docker
-        - docker-compose
-      become: true
-    - name: Copy jenkins docker-compose.yml and supporting files into place
-      copy:
-        src: jenkins
-        dest: /usr/share
-    - name: deploy jenkins-server
-      environment:
-        JENKINS_ADMIN_ID: "{{ jenkins_admin_id }}"
-        JENKINS_ADMIN_PASSWORD: "{{ jenkins_admin_pass }}"
-        LW_ACCESS_ACCOUNT: "{{ lacework_account_name }}"
-        LW_ACCESS_TOKEN: "{{ lacework_access_token }}"
-        K8S_CLUSTER_NAME: "{{ k8s_cluster_name }}"
-        K8S_CONTEXT_NAME: "{{ k8s_context_name }}"
-        K8S_SERVER_URL: "{{ k8s_server_url }}"
-        K8S_BUILD_ROBOT_TOKEN: "{{ k8s_build_robot_token }}"
-        DOCKERHUB_ACCESS_TOKEN: "{{ dockerhub_access_token }}"
-        DOCKERHUB_ACCESS_USER: "{{ dockerhub_access_user }}"
-        JENKINS_AGENT_USER: "{{ agent_user }}"
-        JENKINS_AGENT_PRIV_KEY: "{{ agent_ssh_private_key }}"
-      docker_compose:
-        project_src: /usr/share/jenkins
-        
+
+  roles:
+    - role: geerlingguy.java
+      when: "ansible_os_family == 'Debian'"
+      java_packages:
+        - openjdk-11-jdk
+    - role: lean_delivery.jenkins
