@@ -89,6 +89,10 @@ jenkins:
           - docker.yml
           - jenkins.yml
           - lacework.yml
+        galaxy:
+          roles:
+            - geerlingguy.java
+            - lean_delivery.jenkins
         privilege_escalation:
           become: true
         inventory: !lookup /jenkins-server/outputs/ip
