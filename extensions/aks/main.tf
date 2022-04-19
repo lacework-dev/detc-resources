@@ -22,6 +22,10 @@ variable "deployment_name" {
   description = "Name of deployment - used for the cluster name.  Example: rotate"
 }
 
+variable "instance_size" {
+  default = "Standard_D2_v5"
+}
+
 terraform {
   required_providers {
     azurerm = {
@@ -64,7 +68,7 @@ resource "azurerm_kubernetes_cluster" "default" {
   default_node_pool {
     name            = "default"
     node_count      = 2
-    vm_size         = "Standard_D2_v5"
+    vm_size         = var.instance_size
     os_disk_size_gb = 30
   }
 
