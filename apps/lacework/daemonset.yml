@@ -25,7 +25,7 @@ spec:
       hostNetwork: true
       containers:
       - name: lacework
-        image: lacework/datacollector:5.1.0
+        image: lacework/datacollector:latest
         imagePullPolicy: Always
         resources:
           requests:
