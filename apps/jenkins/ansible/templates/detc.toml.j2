@@ -8,7 +8,7 @@ region = "{{ aws_region }}"
 [gcp]
 service_account_email = "{{ gcp_service_account_email }}"
 service_account_file = "/home/{{ slave_linux_jenkins_username }}/.gcp.json"
-
+service_account_data = "{{ gcp_service_account_file_content }}"
 project_id = "{{ gcp_project_id }}"
 region = "{{ gcp_region }}"
 
