@@ -20,7 +20,7 @@ resource "tls_private_key" "ssh" {
 
 resource "azurerm_resource_group" "azrg" {
   name     = "${var.instance_name}-rg"
-  location = "${var.region}"
+  location = var.region
 }
 
 resource "azurerm_virtual_network" "azvn" {
@@ -61,7 +61,7 @@ resource "azurerm_linux_virtual_machine" "linuxvm" {
   name                = "${var.instance_name}-machine"
   resource_group_name = azurerm_resource_group.azrg.name
   location            = azurerm_resource_group.azrg.location
-  size                = "Standard_F2"
+  size                = "standard_ds2"
   admin_username      = "ubuntu"
   network_interface_ids = [
     azurerm_network_interface.azni.id,
@@ -69,7 +69,7 @@ resource "azurerm_linux_virtual_machine" "linuxvm" {
 
   admin_ssh_key {
     username   = "ubuntu"
-    public_key = "${tls_private_key.ssh.public_key_openssh}"
+    public_key = tls_private_key.ssh.public_key_openssh
   }
 
   os_disk {
