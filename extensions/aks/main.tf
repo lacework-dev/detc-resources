@@ -23,7 +23,7 @@ variable "deployment_name" {
 }
 
 variable "instance_size" {
-  default = "Standard_D2_v2"
+  default = "standard_ds2"
 }
 
 terraform {
