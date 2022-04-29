@@ -1,0 +1,36 @@
+- hosts: all
+  tasks:
+    - name: Update apt repo and cache on all Debian/Ubuntu boxes
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+      become: true
+
+- hosts: all
+  roles:
+    - geerlingguy.nodejs
+  tasks:
+    - name: Create APP Directory
+      file: path=/usr/local/src/app state=directory
+
+    - name: Read-write git checkout from github
+      ansible.builtin.git:
+        repo: https://github.com/lacework-community/reverse-shell-simulation-app.git
+        dest: /usr/local/src/app
+
+    - name: Install packages based on package.json.
+      community.general.npm:
+        path: /usr/local/src/app/app
+
+- hosts: all
+  become: yes
+  roles:
+    - weareinteractive.pm2
+  vars:
+    pm2_upstart: no
+    pm2_apps:
+       - run: server.js
+         cmd: start
+         args: --name app
+         path: /usr/local/src/app/app
+    pm2_apps_default_env:
+      NODE_ENV: production
+

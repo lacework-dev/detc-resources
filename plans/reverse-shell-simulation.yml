@@ -1,0 +1,62 @@
+---
+reverseshell: # Deployment
+  description: |
+    This plan will do the following;
+
+        - Create a new AWS VPC
+        - Create a new Ubuntu EC2 instance
+        - Setup NodeJS and PM2 on that instance
+        - Deploy the reverse-shell-simulation-app: https://github.com/lacework-community/reverse-shell-simulation-app
+
+  steps:
+    - name: reverseshell-vpc
+      description: Create a new AWS Virtual Private Cloud (VPC) for the reverseshell app to reside in
+      extension: VPC.AWS
+      tags: infrastructure
+      args:
+        name: reverseshell-vpc
+    - name: reverseshell-ec2
+      description: Create a new Ubuntu AWS EC2 instance that will host the reverseshell application
+      extension: EC2Instance
+      tags: infrastructure
+      needs:
+        - reverseshell-vpc
+      args:
+        vpc_id: !lookup /reverseshell-vpc/outputs/vpc_id
+        subnet: !lookup /reverseshell-vpc/outputs/subnet_id1
+        instance_name: reverseshell-ec2
+        ports: "22,8080"
+    - name: reverseshell-nodeapp
+      description: Use Ansible to deploy the application source code and get it running
+      extension: Ansible
+      source: git+https://github.com/lacework-dev/detc-resources
+      tags: application
+      needs:
+        - reverseshell-ec2
+      helpers:
+        - helper: ServiceAvailable # Ensure deployed ec2 instance is running and available on port 22
+          args:
+            hostname: !lookup /reverseshell-ec2/outputs/ip
+            port: 22
+        - helper: WriteValue # Write out the pem file created for ec2 instance
+          run_on_dryrun: true
+          args:
+            raw_value: !lookupSecret /reverseshell-ec2/outputs/pem
+            dstfile: instance.pem
+            mode: 0600
+        - helper: GenerateOutput
+          args:
+            dst: "app_url"
+            format: "http://{{ .inventory }}:8080"
+      args:
+        inventory: !lookup /reverseshell-ec2/outputs/ip
+        private_key: instance.pem
+        galaxy:
+          roles:
+            - geerlingguy.nodejs
+            - weareinteractive.pm2
+        user: "ubuntu"
+        playbook: apps/reserve-shell-simulation/nodeapp.yml
+        privilege_escalation:
+          become: true
+
