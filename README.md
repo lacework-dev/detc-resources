@@ -7,4 +7,4 @@ tool.
 Docs
 ---
 
-For documentation on the resources in this repository, please review the docs located [here](https://github.com/lacework-dev/detc/catalog)
+For documentation on the resources in this repository, please review the docs located [here](https://lacework-dev.github.io/detc/catalog)
