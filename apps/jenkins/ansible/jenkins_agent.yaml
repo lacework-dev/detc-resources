@@ -28,12 +28,19 @@
     - name: create gcp auth file
       copy:
         dest: "/home/{{ slave_linux_jenkins_username }}/.gcp.json"
-        content: "{{ gcp_service_account_file_content }}"
+        content: "{{ gcp_service_account_file_content | from_json }}"
+    
+    - name: Create detc dirs
+      ansible.builtin.file:
+        path: "/home/{{ slave_linux_jenkins_username }}/.detc/config"
+        state: directory
+        mode: '0755'
+        owner: "{{ slave_linux_jenkins_username }}"
 
     - name: create detc config
       template:
         src: templates/detc.toml.j2
-        dest: "/home/{{ slave_linux_jenkins_username }}/.detc.toml"
+        dest: "/home/{{ slave_linux_jenkins_username }}/.detc/config/default.toml"
         mode: 0755
         owner: "{{ slave_linux_jenkins_username }}"
 

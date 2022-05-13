@@ -120,7 +120,6 @@ jenkins:
         - jenkins-server-security-group
         - install-jenkins-server
         - jenkins-service-account-gcp
-        # - jenkins-service-account-azure
       lookup:
       helpers:
         - helper: ServiceAvailable
