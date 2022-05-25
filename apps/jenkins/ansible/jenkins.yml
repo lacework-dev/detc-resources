@@ -3,7 +3,6 @@
   hosts: all
 
   vars:
-    jenkins2_permissive_script_enabled: true
     jenkins2_configure_by_groovy: false
     jenkins2_configure_by_casc: true
     jenkins2_plugins_suggested:
@@ -47,7 +46,7 @@
                   privateKeySource:
                     directEntry:
                       privateKey: |
-                        "{{ agent_ssh_private_key | regex_replace('\"') }}"
+                        {{ agent_ssh_private_key }}
               - usernamePassword:
                   id: "dockerhub-access-token"
                   username: "{{ dockerhub_access_user }}"
@@ -85,6 +84,8 @@
               - "Overall/Administer:admin"
               - "Overall/Read:authenticated"
       security:
+        globaljobdslsecurityconfiguration:
+          useScriptSecurity: false
         queueItemAuthenticator:
           authenticators:
           - global:
