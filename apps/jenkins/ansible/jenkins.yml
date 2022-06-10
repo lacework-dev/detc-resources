@@ -16,7 +16,6 @@
       - credentials-binding
       - email-ext
       - git
-      - github-branch-source
       - gradle
       - ldap
       - mailer
@@ -33,6 +32,15 @@
       - docker-workflow
       - warnings-ng
       - permissive-script-security
+      - branch-api
+      - blueocean
+      - blueocean-github-pipeline
+      - github
+      - github-api
+      - github-branch-source
+      - github-oauth
+      - github-checks
+      - pipeline-github-lib
 
     jenkins2_jcasc_config:
       credentials:
@@ -48,12 +56,16 @@
                       privateKey: |
                         {{ agent_ssh_private_key }}
               - usernamePassword:
+                  id: "github-pat"
+                  username: "{{ github_username }}"
+                  password: "{{ github_pat }}"
+              - usernamePassword:
                   id: "dockerhub-access-token"
                   username: "{{ dockerhub_access_user }}"
                   password: "{{ dockerhub_access_token }}"
               - string:
                   id: "lw-access-token"
-                  secret: "{{ lacework_access_token }}"
+                  secret: "{{ lacework_scanner_token }}"
                   description: "lw access token"
               - string:
                   id: "lw-account-name"
