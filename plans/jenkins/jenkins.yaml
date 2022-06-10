@@ -1,5 +1,23 @@
 ---
 jenkins:
+  required_secrets:
+    - path: aws.region
+    - path: azure.app_id
+    - path: azure.password
+    - path: azure.region
+    - path: azure.subscription_id
+    - path: azure.tenant_id
+    - path: gcp.project_id
+    - path: gcp.region
+    - path: dockerhub.token
+    - path: dockerhub.user
+    - path: github.username
+    - path: github.pat
+    - path: jenkins.admin_id
+    - path: jenkins.admin_pass
+    - path: lacework.access_token
+    - path: lacework.scanner_token
+    - path: lacework.account_name
   steps:
     - name: jenkins-vpc
       extension: VPC.AWS
@@ -63,7 +81,7 @@ jenkins:
     - name: install-jenkins-server
       extension: Ansible
       source:
-        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        location: "git+https://github.com/lacework-dev/detc-resources.git,remotes/origin/ipcrm/DETC-203"
         subdir: "apps/jenkins/ansible"
       tags: jenkins
       needs:
@@ -97,8 +115,9 @@ jenkins:
           become: true
         inventory: !lookup /jenkins-server/outputs/ip
         extra_vars:
-          lacework_access_token: !secret lacework.access_token
           lacework_account_name: !secret lacework.account_name
+          lacework_access_token: !secret lacework.access_token
+          lacework_scanner_token: !secret lacework.scanner_token
           jenkins_admin_id: !secret jenkins.admin_id
           jenkins_admin_pass: !secret jenkins.admin_pass
           dockerhub_access_token: !secret dockerhub.token
@@ -110,10 +129,12 @@ jenkins:
           k8s_server_url: !lookup /jenkins-server/outputs/ip
           agent_user: "ubuntu"
           agent_ssh_private_key: !lookupSecret /jenkins-agent/outputs/pem
+          github_username: !secret github.username
+          github_pat: !secret github.pat
     - name: install-jenkins-agent
       extension: Ansible
       source:
-        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        location: "git+https://github.com/lacework-dev/detc-resources.git,remotes/origin/ipcrm/DETC-203"
         subdir: "apps/jenkins/ansible"
       tags: jenkins
       needs:
@@ -137,6 +158,7 @@ jenkins:
         galaxy:
           roles:
             - geerlingguy.java
+            - geerlingguy.nodejs
             - lean_delivery.jenkins_slave
         user: "ubuntu"
         privilege_escalation:

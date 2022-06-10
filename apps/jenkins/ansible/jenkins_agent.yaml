@@ -14,13 +14,16 @@
     slave_linux_jenkins_group: "docker"
     slave_linux_jenkins_public_key: "{{ jenkins_agent_pub_key }}"
     slave_executors_num: 2
+    nodejs_version: "16.x"
 
   roles:
     - role: geerlingguy.java
       when: "ansible_os_family == 'Debian'"
       java_packages:
         - openjdk-11-jdk
+    - role: geerlingguy.nodejs
     - role: lean_delivery.jenkins_slave
+
 
 - name: "Setup DETC Tool"
   hosts: all
