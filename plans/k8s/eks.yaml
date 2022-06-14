@@ -6,7 +6,10 @@ aws-k8s:
       description: This step uses the EKS extension (Terraform under the hood) to deploy the actual cluster. Expect runtimes in excess of 10 minutes
       args:
         region: !secret aws.region
-        deployment_name: sharedeks
+        cluster_name: sharedeks
+      helpers:
+        - helper: EKSKubectl
+          lifecycle: [ afterCreate ]
     - name: lacework
       extension: Kubectl
       description: This step deploys Lacework instrumentation to an existing K8s cluster

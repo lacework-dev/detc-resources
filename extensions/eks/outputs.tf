@@ -24,16 +24,6 @@ output "cluster_worker_security_group_id" {
   value       = aws_security_group.all_worker_mgmt.id
 }
 
-output "kubectl_config" {
-  description = "kubectl config file"
-  value       = module.eks.kubeconfig
-}
-
-output "config_map_aws_auth" {
-  description = "Authenticate for the EKS cluster"
-  value       = module.eks.config_map_aws_auth
-}
-
 output "region" {
   description = "EKS region"
   value       = var.aws_region

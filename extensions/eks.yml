@@ -5,7 +5,7 @@ args:     # These automatically get passed through to the underlying ext as args
     type: string
     required: true
     extension_arg: aws_region
-  deployment_name:
+  cluster_name:
     type: string
     required: true
 source: # Where to get the code the underlying ext should run
@@ -20,8 +20,6 @@ extension: # Core extension name/args to set.  These args are static vs the supp
       - cluster_arn
       - cluster_endpoint
       - cluster_security_group_id
-      - kubectl_config
-      - config_map_aws_auth
       - cluster_name
       - vpc_id
       - public_subnet_id
