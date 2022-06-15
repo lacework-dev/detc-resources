@@ -1,0 +1,30 @@
+---
+name: ALB
+args:
+  vpc_id:
+    type: string
+    required: true
+  subnet1:
+    type: string
+    required: true
+  subnet2:
+    type: string
+    required: true
+  instance_name:
+    type: string
+    required: true
+  instance_id:
+    type: string
+    required: true
+  cert_arn:
+    type: string
+    required: true
+source:
+  location: "git+https://github.com/lacework-dev/detc-resources.git"
+  subdir: "extensions/load-balancer/aws"
+extension:
+  name: Terraform
+  args:
+    cloud: AWS
+    outputs:
+      - alb_url
