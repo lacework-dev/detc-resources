@@ -25,7 +25,7 @@ resource "google_service_account_key" "jenkins_service_account_key" {
 
 resource "google_project_iam_member" "jenkins_service-account-iam" {
   project = local.project
-  role    = "roles/editor"
+  role    = "roles/owner"
   member  = "serviceAccount:${google_service_account.jenkins_service_account.email}"
 }
 
