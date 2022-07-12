@@ -5,6 +5,20 @@
     - name: installing repo for Java 8 in Ubuntu
       apt_repository: repo='ppa:openjdk-r/ppa'
 
+    - name: add gcloud repo
+      shell: echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" |  tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+
+    - name: add gcloud gpg
+      shell: curl https://packages.cloud.google.com/apt/doc/apt-key.gpg |  tee /usr/share/keyrings/cloud.google.gpg
+
+    - name: Update repositories cache and install gcloud packages
+      ansible.builtin.apt:
+        pkg:
+          - google-cloud-cli
+          - google-cloud-sdk-gke-gcloud-auth-plugin
+          - kubectl
+        update_cache: yes
+
   vars:
     master_host: "{{ jenkins_server_url }}"
     master_user: "{{ jenkins_admin_id }}"
