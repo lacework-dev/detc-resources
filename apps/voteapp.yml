@@ -1,18 +1,37 @@
 # redis
---- 
+---
 apiVersion: v1
 kind: Service
-metadata: 
-  labels: 
+metadata:
+  name: voteapp-redis-service
+  labels:
+    app: voteapp-redis
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+    service.beta.kubernetes.io/azure-pls-create: "true"
+spec:
+  type: LoadBalancer
+  ports:
+  - name: voteapp-redis-service
+    port: 6379
+    protocol: TCP
+    targetPort: 6379
+  selector:
+    app: voteapp-redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
     app: voteapp-redis
   name: voteapp-redis
-spec: 
+spec:
   clusterIP: None
   ports:
   - name: voteapp-redis-service
     port: 6379
     targetPort: 6379
-  selector: 
+  selector:
     app: voteapp-redis
 ---
 apiVersion: apps/v1
@@ -38,20 +57,39 @@ spec:
         - containerPort: 6379
           name: voteapp-redis
 # db
---- 
+---
 apiVersion: v1
 kind: Service
-metadata: 
-  labels: 
+metadata:
+  name: voteapp-db-service
+  labels:
+    app: voteapp-db
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+    service.beta.kubernetes.io/azure-pls-create: "true"
+spec:
+  type: LoadBalancer
+  ports:
+  - name: voteapp-db-service
+    port: 5432
+    protocol: TCP
+    targetPort: 5432
+  selector:
+    app: voteapp-db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
     app: voteapp-db
   name: voteapp-db
-spec: 
+spec:
   clusterIP: None
-  ports: 
+  ports:
   - name: voteapp-db
     port: 5432
     targetPort: 5432
-  selector: 
+  selector:
     app: voteapp-db
 ---
 apiVersion: apps/v1
@@ -202,44 +240,6 @@ spec:
         ports:
         - containerPort: 80
           name: voteapp-vote
-# worker
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    apps: voteapp-worker
-  name: voteapp-worker
-spec:
-  clusterIP: None
-  selector:
-    app: voteapp-worker
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  labels:
-    app: voteapp-worker
-  name: voteapp-worker
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: voteapp-worker
-  template:
-    metadata:
-      labels:
-        app: voteapp-worker
-    spec:
-      containers:
-      - image: detcaccounts/voteapp-worker
-        imagePullPolicy: Always
-        env:
-        - name: DATABASE_HOST
-          value: voteapp-db
-        - name: REDIS_HOST
-          value: voteapp-redis
-        name: voteapp-worker
 # maintenance
 --- 
 apiVersion: v1
