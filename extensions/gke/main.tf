@@ -29,7 +29,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "4.24.0"
+      version = ">=4.28.0"
     }
   }
 
@@ -42,22 +42,21 @@ provider "google" {
 }
 
 module "gke" {
-  source                 = "terraform-google-modules/kubernetes-engine/google"
-  project_id             = var.project
-  name                   = var.cluster_name
-  region                 = var.region
+  source            = "terraform-google-modules/kubernetes-engine/google"
+  project_id        = var.project
+  name              = var.cluster_name
+  region            = var.region
+  network           = "${var.project}-vpc"
+  subnetwork        = module.vpc.subnets_names[0]
+  ip_range_pods     = "${var.project}-ip-range-pods-name"
+  ip_range_services = "${var.project}-ip-range-services-name"
 
-  network                = "${var.project}-vpc"
-  subnetwork             = module.vpc.subnets_names[0]
-  ip_range_pods          = "${var.project}-ip-range-pods-name"
-  ip_range_services      = "${var.project}-ip-range-services-name"
-
-  skip_provisioners      = true
+  skip_provisioners = true
 }
 
 module "vpc" {
   source  = "terraform-google-modules/network/google"
-  version = "~> 4.0"
+  version = "~> 5.1"
 
   project_id   = var.project
   network_name = "${var.project}-vpc"
@@ -85,7 +84,7 @@ module "vpc" {
 }
 
 module "gke_auth" {
-  source = "terraform-google-modules/kubernetes-engine/google//modules/auth"
+  source     = "terraform-google-modules/kubernetes-engine/google//modules/auth"
   depends_on = [module.gke]
 
   project_id           = var.project
