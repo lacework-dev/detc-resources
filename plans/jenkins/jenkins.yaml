@@ -15,6 +15,8 @@ jenkins:
     - path: github.pat
     - path: jenkins.admin_id
     - path: jenkins.admin_pass
+    - path: jenkins.ro_id
+    - path: jenkins.ro_pass
     - path: lacework.access_token
     - path: lacework.scanner_token
     - path: lacework.account_name
@@ -120,6 +122,8 @@ jenkins:
           lacework_scanner_token: !secret lacework.scanner_token
           jenkins_admin_id: !secret jenkins.admin_id
           jenkins_admin_pass: !secret jenkins.admin_pass
+          jenkins_ro_id: !secret jenkins.ro_id
+          jenkins_ro_pass: !secret jenkins.ro_pass
           dockerhub_access_token: !secret dockerhub.token
           dockerhub_access_user: !secret dockerhub.user
           source_private_key: !lookupSecret /jenkins-server/outputs/pem

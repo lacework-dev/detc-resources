@@ -90,11 +90,16 @@
             users:
              - id: "{{ jenkins_admin_id }}"
                password: "{{ jenkins_admin_pass }}"
+             - id: "{{ jenkins_ro_id }}"
+               password: "{{ jenkins_ro_pass }}"
         authorizationStrategy:
           globalMatrix:
             permissions:
-              - "Overall/Administer:admin"
+              - "Overall/Administer:{{ jenkins_admin_id }}"
               - "Overall/Read:authenticated"
+              - "Overall/Read:{{ jenkins_ro_id }}"
+              - "Job/Read:{{ jenkins_ro_id }}"
+              - "View/Read:{{ jenkins_ro_id }}"
       security:
         globaljobdslsecurityconfiguration:
           useScriptSecurity: false
