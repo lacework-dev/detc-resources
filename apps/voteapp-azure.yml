@@ -202,44 +202,6 @@ spec:
         ports:
         - containerPort: 80
           name: voteapp-vote
-# worker
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    apps: voteapp-worker
-  name: voteapp-worker
-spec:
-  clusterIP: None
-  selector:
-    app: voteapp-worker
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  labels:
-    app: voteapp-worker
-  name: voteapp-worker
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: voteapp-worker
-  template:
-    metadata:
-      labels:
-        app: voteapp-worker
-    spec:
-      containers:
-      - image: detcaccounts/voteapp-worker
-        imagePullPolicy: Always
-        env:
-        - name: DATABASE_HOST
-          value: voteapp-db
-        - name: REDIS_HOST
-          value: voteapp-redis
-        name: voteapp-worker
 # maintenance
 ---
 apiVersion: v1
