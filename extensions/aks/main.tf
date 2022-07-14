@@ -30,7 +30,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "2.66.0"
+      version = "3.13.0"
     }
   }
 
@@ -50,6 +50,35 @@ provider "azurerm" {
   tenant_id       = var.azure_tenant_id
 }
 
+resource "azurerm_network_security_group" "default" {
+  name                = "${local.cluster_name}-sg"
+  location            = azurerm_resource_group.default.location
+  resource_group_name = azurerm_resource_group.default.name
+}
+
+resource "azurerm_virtual_network" "default" {
+  name                = "${local.cluster_name}-network"
+  location            = azurerm_resource_group.default.location
+  resource_group_name = azurerm_resource_group.default.name
+  address_space       = ["10.0.0.0/16"]
+  dns_servers         = ["10.0.0.4", "10.0.0.5"]
+
+  subnet {
+    name           = "subnet1"
+    address_prefix = "10.0.1.0/24"
+  }
+
+  subnet {
+    name           = "subnet2"
+    address_prefix = "10.0.2.0/24"
+    security_group = azurerm_network_security_group.default.id
+  }
+
+  tags = {
+    environment = "Production"
+  }
+}
+
 resource "azurerm_resource_group" "default" {
   name     = "${local.cluster_name}-rg"
   location = var.azure_location
@@ -59,11 +88,19 @@ resource "azurerm_resource_group" "default" {
   }
 }
 
+data "azurerm_subnet" "default" {
+  name = "${local.cluster_name}-subnet"
+  resource_group_name = azurerm_resource_group.default.name
+  virtual_network_name = azurerm_virtual_network.default.name
+}
+
 resource "azurerm_kubernetes_cluster" "default" {
   name                = "${local.cluster_name}-aks"
   location            = azurerm_resource_group.default.location
   resource_group_name = azurerm_resource_group.default.name
   dns_prefix          = "${local.cluster_name}-k8s"
+
+  private_cluster_public_fqdn_enabled = true
 
   default_node_pool {
     name            = "default"
@@ -77,8 +114,12 @@ resource "azurerm_kubernetes_cluster" "default" {
     client_secret = var.azure_password
   }
 
-  role_based_access_control {
-    enabled = true
+  network_profile {
+    network_plugin = "azure"
+    network_policy = "azure"
+    dns_service_ip = "10.1.0.10"
+    docker_bridge_cidr = "170.10.0.1/16"
+   service_cidr = "10.1.0.0/16"
   }
 
   tags = {
