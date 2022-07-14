@@ -1,0 +1,49 @@
+gke-admission-controller:
+  needs:
+    - azure-k8s
+  description: |
+    Install Admission controller into AKS
+  version: 1.0.0
+  required_secrets:
+    - path: admission.ca_bundle
+      prompt: true
+    - path: admission.server_certificate
+      prompt: true
+    - path: admission.server_key
+      prompt: true
+    - path: lacework.account_name
+      prompt: true
+    - path: lacework.admission_controller_token
+      prompt: true
+  steps:
+  - name: admission-controller
+    extension: Helm
+    source:
+      location: https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/lacework-admission-controller/values.yaml
+      templates:
+        - values.yaml
+    helpers:
+      - helper: WriteValue
+        run_on_dryrun: true
+        args:
+          raw_value: !lookup /azure-k8s/k8s/outputs/kubectl_config
+          dstfile: kube.conf
+    args:
+      repos:
+        - name: lacework
+          url: https://lacework.github.io/helm-charts
+      name: lacework-admission-controller
+      namespace: lacework
+      chart: lacework/admission-controller
+      account_name: !secret lacework.account_name
+      admission_controller_token: !secret lacework.admission_controller_token
+      kubectl_config_file: kube.conf
+      set_args:
+        - name: webhooks.caBundle
+          value: !secret admission.ca_bundle
+        - name: certs.serverCertificate
+          value: !secret admission.server_certificate
+        - name: certs.serverKey
+          value: !secret admission.server_key
+      value_files:
+        - values.yaml
