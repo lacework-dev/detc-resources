@@ -1,0 +1,15 @@
+---
+ecs-fargate:
+  steps:
+    - name: ecs-fargate-task-vpc
+      description: Create a new AWS Virtual Private Cloud (VPC) for the quickstart app to reside in
+      extension: VPC.AWS
+      tags: infrastructure
+      args:
+        name: ecs-fargate-task-vpc
+    - name: ecs-fargate
+      extension: ECS.Fargate
+      description: Deploy a new ECS (Fargate) cluster
+      args:
+        region: !secret aws.region
+        cluster_name: sharedecs-fargate
