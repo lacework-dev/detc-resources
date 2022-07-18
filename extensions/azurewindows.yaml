@@ -1,0 +1,24 @@
+---
+name: AzureWindows
+args:
+  instance_name:
+    type: string
+    required: true
+  region:
+    type: string
+    required: true
+    extension_arg: region
+  password:
+    type: string
+    required: true
+source:
+  location: "git+https://github.com/lacework-dev/detc-resources.git"
+  subdir: "extensions/azurewindows"
+extension:
+  name: Terraform 
+  args:
+    cloud: Azure
+    outputs:
+      - ip
+      - password
+      - user
