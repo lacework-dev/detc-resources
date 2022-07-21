@@ -14,7 +14,7 @@
 
     - name: download worker application artifact
       ansible.windows.win_get_url:
-        url: https://corpdocs-2022.s3.eu-west-3.amazonaws.com/voteapp-worker.zip
+        url: https://detc-artifacts.s3.amazonaws.com/voteapp/voteapp-worker-main.zip
         dest: C:\voteapp-worker.zip
 
     - name: extract worker application artifact
@@ -25,24 +25,24 @@
     - name: write config
       template:
         src: appsettings.j2
-        dest: C:\voteapp-worker\voteapp-worker-gabe-add-database-creation-support\appsettings.json
+        dest: C:\voteapp-worker\voteapp-worker-main\appsettings.json
 
     - name: publish dotnet app
       ignore_errors: True
-      ansible.windows.win_command: dotnet publish --output C:\voteapp-worker\voteapp-worker-gabe-add-database-creation-support
+      ansible.windows.win_command: dotnet publish --output C:\voteapp-worker\voteapp-worker-main
       args:
-        chdir: C:\voteapp-worker\voteapp-worker-gabe-add-database-creation-support
-        creates: C:\voteapp-worker\voteapp-worker-gabe-add-database-creation-support\voteapp-worker.exe
+        chdir: C:\voteapp-worker\voteapp-worker-main
+        creates: C:\voteapp-worker\voteapp-worker-main\voteapp-worker.exe
 
     - name: db migration
       ansible.windows.win_command: dotnet ef database update
       args:
-        chdir: C:\voteapp-worker\voteapp-worker-gabe-add-database-creation-support
+        chdir: C:\voteapp-worker\voteapp-worker-main
 
     - name: create voteapp-worker service
       ansible.windows.win_service:
         name: VoteApp Worker Service
-        path: C:\voteapp-worker\voteapp-worker-gabe-add-database-creation-support\vote-worker.exe
+        path: C:\voteapp-worker\voteapp-worker-main\vote-worker.exe
         display_name: VoteApp Worker Service
         description: VoteApp Worker Service
         state: started
