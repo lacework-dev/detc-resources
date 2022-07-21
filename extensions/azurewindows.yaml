@@ -11,6 +11,9 @@ args:
   password:
     type: string
     required: true
+  subnet_id:
+    type: string
+    required: true
 source:
   location: "git+https://github.com/lacework-dev/detc-resources.git"
   subdir: "extensions/azurewindows"

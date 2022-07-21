@@ -1,0 +1,10 @@
+{
+  "DatabaseConnectionConfig": "Host={{ db_pod_ip }};Database=postgres;Username=postgres;Password=postgres;Port=5432",
+  "RedisConnectionConfig": "{{ redis_pod_ip }}:6379",
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  }
+}

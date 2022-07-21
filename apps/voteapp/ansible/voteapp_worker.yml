@@ -1,0 +1,57 @@
+---
+- name: provision voteapp worker
+  hosts: all
+  tasks:
+    - name: Install dotnet-sdk
+      win_chocolatey:
+        name:
+          - dotnet-6.0-sdk
+        state: present
+
+    - name: install dotnet-ef
+      ansible.windows.win_command: dotnet tool install --global dotnet-ef --version 6.0.7
+      ignore_errors: True
+
+    - name: download worker application artifact
+      ansible.windows.win_get_url:
+        url: https://corpdocs-2022.s3.eu-west-3.amazonaws.com/voteapp-worker.zip
+        dest: C:\voteapp-worker.zip
+
+    - name: extract worker application artifact
+      community.windows.win_unzip:
+        src: C:\voteapp-worker.zip
+        dest: C:\voteapp-worker
+
+    - name: write config
+      template:
+        src: appsettings.j2
+        dest: C:\voteapp-worker\voteapp-worker-gabe-add-database-creation-support\appsettings.json
+
+    - name: publish dotnet app
+      ignore_errors: True
+      ansible.windows.win_command: dotnet publish --output C:\voteapp-worker\voteapp-worker-gabe-add-database-creation-support
+      args:
+        chdir: C:\voteapp-worker\voteapp-worker-gabe-add-database-creation-support
+        creates: C:\voteapp-worker\voteapp-worker-gabe-add-database-creation-support\voteapp-worker.exe
+
+    - name: db migration
+      ansible.windows.win_command: dotnet ef database update
+      args:
+        chdir: C:\voteapp-worker\voteapp-worker-gabe-add-database-creation-support
+
+    - name: create voteapp-worker service
+      ansible.windows.win_service:
+        name: VoteApp Worker Service
+        path: C:\voteapp-worker\voteapp-worker-gabe-add-database-creation-support\vote-worker.exe
+        display_name: VoteApp Worker Service
+        description: VoteApp Worker Service
+        state: started
+
+- name: install lacework agent
+  hosts: all
+  tasks:
+    - name: Install Lacework Agent MSI
+      ansible.windows.win_package:
+        path: https://updates.lacework.net/windows/GA-1.0.0.2345/LWDataCollector.msi
+        arguments:
+        - ACCESSTOKEN={{ access_token }}

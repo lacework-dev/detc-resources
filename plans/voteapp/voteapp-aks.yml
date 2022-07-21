@@ -1,12 +1,16 @@
 ---
 VoteAppAKS:
+  required_secrets:
+    - path: windows.adminpass
+      prompt: true
   needs:
     - azure-k8s
   steps:
     - name: voteapp
       extension: Kubectl
       tags: applications
-      source: https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/voteapp-azure.yml
+      source:
+        location: https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/voteapp/k8s/voteapp-azure.yml
       helpers:
         - helper: WriteValue
           run_on_dryrun: true
@@ -27,6 +31,12 @@ VoteAppAKS:
         kubectl_config_file: kubectl
         kube_manifest_path: voteapp-azure.yml
         wait_for:
+          voteapp-db:
+            resource_type: "pods"
+            json_path: '{.items[?(@.metadata.labels.app == "voteapp-db")].status.podIP}'
+          voteapp-redis:
+            resource_type: "pods"
+            json_path: '{.items[?(@.metadata.labels.app == "voteapp-redis")].status.podIP}'
           vote:
             resource_type: svc
             resource_name: voteapp-vote
@@ -51,6 +61,15 @@ VoteAppAKS:
       args:
         region: !secret azure.region
         instance_name: "vote-traffic"
+    - name: voteapp-worker-instance
+      extension: AzureWindows
+      needs:
+        - voteapp
+      args:
+        region: !secret azure.region
+        password: !secret windows.adminpass
+        instance_name: "voteapp-worker"
+        subnet_id: !lookup /azure-k8s/k8s/outputs/cluster_subnet_id
     - name: traffic
       extension: Ansible
       source: https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/traffic/install_traffic.yml
@@ -79,3 +98,25 @@ VoteAppAKS:
         extra_vars:
           vote_app_url: !lookup /voteapp/outputs/vote_app_url
           result_app_url: !lookup /voteapp/outputs/result_app_url
+    - name: voteapp-worker-provision
+      extension: Ansible
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "apps/voteapp/ansible"
+      needs:
+        - voteapp-worker-instance
+      helpers:
+        - helper: ServiceAvailable
+          args:
+            hostname: !lookup /voteapp-worker-instance/outputs/ip
+            port: 5986
+      args:
+        inventory: !lookup /voteapp-worker-instance/outputs/ip
+        user: !lookup /voteapp-worker-instance/outputs/user
+        winrm: true
+        winrm_password: !lookupSecret /voteapp-worker-instance/outputs/password
+        playbook: voteapp_worker.yml
+        extra_vars:
+          access_token: !secret lacework.access_token
+          db_pod_ip: !lookup /voteapp/outputs/voteapp-db
+          redis_pod_ip: !lookup /voteapp/outputs/voteapp-redis
