@@ -23,3 +23,15 @@ output "kubectl_config" {
   sensitive   = true
   value       = azurerm_kubernetes_cluster.default.kube_config_raw
 }
+
+output "cluster_subnet_id" {
+  value = azurerm_subnet.aks.id
+}
+
+output "cluster_subnet_name" {
+  value = azurerm_subnet.aks.name
+}
+
+output "cluster_subnet_prefix" {
+  value = azurerm_subnet.aks.address_prefixes
+}

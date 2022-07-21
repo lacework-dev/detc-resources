@@ -10,6 +10,10 @@ variable "password" {
   description = "Administrator Password"
 }
 
+variable "subnet_id" {
+  description = "Subnet for VM"
+}
+
 provider "azurerm" {
   features {}
 }
@@ -17,20 +21,6 @@ provider "azurerm" {
 resource "azurerm_resource_group" "azrg" {
   name     = "${var.instance_name}-rg"
   location = var.region
-}
-
-resource "azurerm_virtual_network" "azvn" {
-  name                = "${var.instance_name}-network"
-  address_space       = ["10.0.0.0/16"]
-  location            = azurerm_resource_group.azrg.location
-  resource_group_name = azurerm_resource_group.azrg.name
-}
-
-resource "azurerm_subnet" "azsubnet" {
-  name                 = "internal"
-  resource_group_name  = azurerm_resource_group.azrg.name
-  virtual_network_name = azurerm_virtual_network.azvn.name
-  address_prefixes     = ["10.0.2.0/24"]
 }
 
 resource "azurerm_public_ip" "azpubip" {
@@ -47,7 +37,7 @@ resource "azurerm_network_interface" "azni" {
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azurerm_subnet.azsubnet.id
+    subnet_id                     = var.subnet_id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.azpubip.id
   }
