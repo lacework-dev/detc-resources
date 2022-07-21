@@ -20,6 +20,8 @@ jenkins:
     - path: lacework.access_token
     - path: lacework.scanner_token
     - path: lacework.account_name
+    - path: lacework.admission_controller_token
+    - path: windows.password 
   steps:
     - name: jenkins-vpc
       extension: VPC.AWS
@@ -181,6 +183,7 @@ jenkins:
           slave_linux_user_group: ubuntu
           slave_linux_jenkins_public_key: !lookupSecret /jenkins-agent/outputs/public_key
           lacework_access_token: !secret lacework.access_token
+          lacework_admission_controller_token: !secret lacework.admission_controller_token
 
           aws_access_key: !lookupSecret /jenkins-server-security-group/outputs/aws_access_key
           aws_secret_key: !lookupSecret /jenkins-server-security-group/outputs/aws_secret_key
@@ -196,3 +199,5 @@ jenkins:
           azure_password: !secret azure.password
           azure_tenant_id: !secret azure.tenant_id
           azure_subscription_id: !secret azure.subscription_id
+
+          windows_password: !secret windows.password
