@@ -1,7 +1,7 @@
 ---
 VoteAppAKS:
   required_secrets:
-    - path: windows.adminpass
+    - path: windows.password
       prompt: true
   needs:
     - azure-k8s
@@ -67,7 +67,7 @@ VoteAppAKS:
         - voteapp
       args:
         region: !secret azure.region
-        password: !secret windows.adminpass
+        password: !secret windows.password
         instance_name: "voteapp-worker"
         subnet_id: !lookup /azure-k8s/k8s/outputs/cluster_subnet_id
     - name: traffic
