@@ -1,5 +1,4 @@
 variable "registry_name" {}
-
 terraform {
   required_providers {
     aws = {
@@ -35,7 +34,10 @@ resource "aws_iam_role" "registry_access_role" {
       "Principal": { 
         "AWS": "${aws_iam_user.ecr_registry_user.arn}"
       },
-      "Action": "sts:AssumeRole"
+      "Action": [
+        "sts:AssumeRole",
+        "sts:TagSession"
+      ]
     },
     {
       "Effect": "Allow",
