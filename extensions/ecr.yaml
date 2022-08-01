@@ -7,7 +7,7 @@ args:
 source:
   location: "git+https://github.com/lacework-dev/detc-resources.git"
   subdir: "extensions/ecr"
-extension: # Core extension name/args to set.  These args are static vs the supplied ones above
+extension:
   name: Terraform 
   args:
     cloud: AWS
