@@ -24,7 +24,10 @@ resource "aws_iam_access_key" "ecr_registry_user_key" {
 }
 
 resource "aws_iam_role" "registry_access_role" {
-  name               = "${var.registry_name}-role"
+  name = "${var.registry_name}-role"
+  managed_policy_arns = [
+    aws_iam_policy.registry_access_policy.arn
+  ]
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -75,13 +78,6 @@ resource "aws_iam_policy" "registry_access_policy" {
     ]
   })
 }
-
-resource "aws_iam_policy_attachment" "access_iam_role_policy_attach" {
-  name       = "${var.registry_name}-attach"
-  roles      = [aws_iam_role.registry_access_role.name]
-  policy_arn = aws_iam_policy.registry_access_policy.arn
-}
-
 
 output "access_iam_role" {
   value = aws_iam_role.registry_access_role.arn
