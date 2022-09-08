@@ -1,6 +1,8 @@
 ---
 VoteAppAKS:
   required_secrets:
+    - path: windows.username
+      prompt: true
     - path: windows.password
       prompt: true
   needs:
@@ -68,6 +70,7 @@ VoteAppAKS:
       args:
         region: !secret azure.region
         password: !secret windows.password
+        username: !secret windows.username
         instance_name: "voteapp-worker"
         subnet_id: !lookup /azure-k8s/k8s/outputs/cluster_subnet_id
     - name: traffic
@@ -118,5 +121,7 @@ VoteAppAKS:
         playbook: voteapp_worker.yml
         extra_vars:
           access_token: !secret lacework.access_token
+          windows_password: !secret windows.password
+          windows_username: !secret windows.username
           db_pod_ip: !lookup /voteapp/outputs/voteapp-db
           redis_pod_ip: !lookup /voteapp/outputs/voteapp-redis
