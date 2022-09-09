@@ -1,0 +1,42 @@
+---
+    azure-custom-lql-policies:
+      steps:
+        - name: azure-custom-lql-rdp
+          extension: Terraform
+          source:
+            location: "git+https://github.com/lacework-dev/detc-resources.git"
+            subdir: "apps/lacework-accounts/azure/lql"
+          args:
+            cloud: azure
+            tfvars:
+              lacework_account: !secret lacework.account_name
+              lacework_subaccount: !secret lacework.subaccount_name
+              lacework_apikey: !secret lacework.api_key
+              lacework_apisecret: !secret lacework.api_secret
+              port: 3389
+        - name: azure-custom-lql-smb
+          extension: Terraform
+          source:
+            location: "git+https://github.com/lacework-dev/detc-resources.git"
+            subdir: "apps/lacework-accounts/azure/lql"
+          args:
+            cloud: azure
+            tfvars:
+              lacework_account: !secret lacework.account_name
+              lacework_subaccount: !secret lacework.subaccount_name
+              lacework_apikey: !secret lacework.api_key
+              lacework_apisecret: !secret lacework.api_secret
+              port: 445
+        - name: azure-custom-lql-winrm
+          extension: Terraform
+          source:
+            location: "git+https://github.com/lacework-dev/detc-resources.git"
+            subdir: "apps/lacework-accounts/azure/lql"
+          args:
+            cloud: azure
+            tfvars:
+              lacework_account: !secret lacework.account_name
+              lacework_subaccount: !secret lacework.subaccount_name
+              lacework_apikey: !secret lacework.api_key
+              lacework_apisecret: !secret lacework.api_secret
+              port: 5986
