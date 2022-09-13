@@ -10,21 +10,6 @@ variable "cluster_name" {
   description = "Name of the gke cluster. Example: gke-cluster-foo"
 }
 
-variable "gke_username" {
-  default     = ""
-  description = "GKE username"
-}
-
-variable "gke_password" {
-  default     = ""
-  description = "GKE password"
-}
-
-variable "gke_node_count" {
-  default     = 2
-  description = "number of GKE nodes in the cluster"
-}
-
 terraform {
   required_providers {
     google = {
@@ -64,7 +49,7 @@ module "vpc" {
   subnets = [
     {
       subnet_name   = "${var.project}-subnetwork"
-      subnet_ip     = "10.0.0.0/17"
+      subnet_ip     = "10.0.0.0/22"
       subnet_region = var.region
     }
   ]
@@ -73,11 +58,11 @@ module "vpc" {
     ("${var.project}-subnetwork") = [
       {
         range_name    = "${var.project}-ip-range-pods-name"
-        ip_cidr_range = "192.168.0.0/18"
+        ip_cidr_range = "192.168.0.0/22"
       },
       {
         range_name    = "${var.project}-ip-range-services-name"
-        ip_cidr_range = "192.168.64.0/18"
+        ip_cidr_range = "192.168.64.0/22"
       }
     ]
   }
