@@ -4,6 +4,10 @@ terraform {
       source  = "lacework/lacework"
       version = "~> 0.16"
     }
+    google = {
+      source  = "hashicorp/google"
+      version = "4.36.0"
+    }
   }
 }
 
