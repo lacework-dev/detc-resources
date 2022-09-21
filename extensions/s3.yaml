@@ -1,0 +1,16 @@
+---
+name: S3
+args:
+   region:
+    type: string
+    required: true
+source:
+  location: "git+https://github.com/lacework-dev/detc-resources.git"
+  subdir: "extensions/s3/"
+extension:
+  name: Terraform
+  args:
+    cloud: AWS
+    outputs:
+      - region
+      - bucket_name
