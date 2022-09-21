@@ -14,6 +14,10 @@ variable "subnet_id" {
   description = "Subnet for VM"
 }
 
+variable "username" {
+  description = "Windows user name"
+}
+
 provider "azurerm" {
   features {}
 }
@@ -43,14 +47,13 @@ resource "azurerm_network_interface" "azni" {
   }
 }
 
-
 resource "azurerm_windows_virtual_machine" "windowsvm" {
   name                = var.instance_name
   computer_name       = var.instance_name
   resource_group_name = azurerm_resource_group.azrg.name
   location            = azurerm_resource_group.azrg.location
   size                = "Standard_F2"
-  admin_username      = "adminuser"
+  admin_username      = var.username
   admin_password      = var.password
   network_interface_ids = [
     azurerm_network_interface.azni.id,
@@ -88,12 +91,49 @@ resource "azurerm_virtual_machine_extension" "winrm_listener" {
   settings             = jsonencode({ "commandToExecute" = "powershell.exe -ExecutionPolicy Unrestricted -encodedCommand ${textencodebase64(local.run_command, "UTF-16LE")}" })
 }
 
+
+resource "azurerm_network_interface_security_group_association" "nisga" {
+  network_interface_id      = azurerm_network_interface.azni.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
+
+resource "azurerm_network_security_group" "nsg" {
+  name                = "${var.instance_name}-nsg"
+  location            = azurerm_resource_group.azrg.location
+  resource_group_name = azurerm_resource_group.azrg.name
+
+  security_rule {   //Here opened WinRMport
+    name                       = "winrm"
+    priority                   = 1010
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "5986"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {   //Here opened WebDAV
+    name                       = "webdav"
+    priority                   = 1011
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+}
+
 output "ip" {
   value = azurerm_windows_virtual_machine.windowsvm.public_ip_address
 }
 
 output "user" {
-  value = "adminuser"
+  value = var.username
 }
 
 output "password" {
