@@ -1,0 +1,81 @@
+---
+- name: LDAP/HTTP Service for Log4j
+  hosts: all
+  remote_user: ubuntu
+
+  tasks:
+  - name: Update apt
+    apt:
+      update_cache: yes
+  - name: Install packages
+    apt:
+      pkg:
+        - nodejs
+        - npm
+        - unzip
+        - wget
+      state: present
+  - name: Download DETC log4j services
+    ansible.builtin.get_url:
+      url: https://detc-log4j-services.s3.amazonaws.com/detc-log4j-services.zip
+      dest: /tmp/detc-log4j-services.zip
+      mode: '0777'
+  - name: Extract DETC log4j services
+    ansible.builtin.command:
+      cmd: unzip /tmp/detc-log4j-services.zip -d /home/ubuntu/detc-log4j-services
+  - name: Install npm packages ldap
+    community.general.npm:
+      path: /home/ubuntu/detc-log4j-services/ldap-server/
+  - name: Install npm packages http
+    community.general.npm:
+      path: /home/ubuntu/detc-log4j-services/http-server/
+  - name: Write systemd config file for ldap
+    blockinfile:
+      path: /etc/systemd/system/ldap.service
+      create: true
+      state: present
+      block: |
+        [Unit]
+        Description=LDAP service for Log4j Demo
+
+        [Service]
+        PIDFile=/tmp/ldap-99.pid
+        Restart=always
+        KillSignal=SIGQUIT
+        WorkingDirectory=/home/ubuntu/detc-log4j-services/ldap-server/
+        ExecStart=/usr/bin/node /home/ubuntu/detc-log4j-services/ldap-server/index.js
+        Environment="HOST_IP_ADDRESS={{ host_ip }}"
+
+        [Install]
+        WantedBy=multi-user.target
+
+  - name: Make sure ldap service is running
+    ansible.builtin.systemd:
+      name: ldap.service
+      enabled: yes
+      state: started
+
+  - name: Write systemd config file for httpservice
+    blockinfile:
+      path: /etc/systemd/system/httpservice.service
+      create: true
+      state: present
+      block: |
+        [Unit]
+        Description=httpservice service for Log4j Demo
+
+        [Service]
+        PIDFile=/tmp/httpservice-99.pid
+        Restart=always
+        KillSignal=SIGQUIT
+        WorkingDirectory=/home/ubuntu/detc-log4j-services/http-server/
+        ExecStart=/usr/bin/node /home/ubuntu/detc-log4j-services/http-server/index.js
+
+        [Install]
+        WantedBy=multi-user.target
+
+  - name: Make sure httpservice service is running
+    ansible.builtin.systemd:
+      name: httpservice.service
+      enabled: yes
+      state: started
