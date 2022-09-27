@@ -1,4 +1,4 @@
-gke-admission-controller:
+aks-admission-controller:
   needs:
     - azure-k8s
   description: |
