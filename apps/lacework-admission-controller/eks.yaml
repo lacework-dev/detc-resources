@@ -1,4 +1,4 @@
-gke-admission-controller:
+eks-admission-controller:
   needs:
     - aws-k8s
   description: |
