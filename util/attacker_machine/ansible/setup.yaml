@@ -1,0 +1,63 @@
+- name: "setup attacker-machine"
+  hosts: all
+  tasks:
+    - name: generate SSH key "{{ssh_key_filename}}"
+      become: false
+      openssh_keypair:
+        path: "{{ssh_key_filename}}"
+        type: rsa
+        size: 4096
+        state: present
+        force: no
+
+    - name: add ssh key
+      shell: cat {{ssh_key_filename}}.pub >> /home/ubuntu/.ssh/authorized_keys
+
+    - name: add gcloud repo
+      shell: echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" |  tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+
+    - name: add gcloud gpg
+      shell: curl https://packages.cloud.google.com/apt/doc/apt-key.gpg |  tee /usr/share/keyrings/cloud.google.gpg
+
+    - name: Update repositories cache and install gcloud packages
+      ansible.builtin.apt:
+        pkg:
+          - google-cloud-cli
+          - google-cloud-sdk-gke-gcloud-auth-plugin
+          - kubectl
+        update_cache: yes
+
+    - name: Run MS install script
+      shell: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+    - name: Install Azure CLi
+      package:
+        name: "azure-cli"
+        state: present
+
+    - name: Verify installed version
+      shell: az --version
+      register: azureVersion
+
+    - debug:
+        msg: "{{azureVersion.stdout}}"  
+
+    - name: Install jq
+      ansible.builtin.package:
+        name: jq
+        state: present
+
+    - name: Install pip
+      ansible.builtin.package:
+        name: pip
+        state: present
+
+    - name: Install yq
+      pip:
+        name: yq
+
+    - name: Run netdog install script
+      shell: curl https://detc-netdog-artifacts.s3.amazonaws.com/install.sh | sudo bash
+
+    - name: Run detc-gabe install script
+      shell: curl https://detc-gabe-artifacts.s3.amazonaws.com/install.sh | sudo bash
