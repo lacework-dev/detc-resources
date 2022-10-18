@@ -87,6 +87,50 @@ resource "lacework_policy" "DETC_POTENTIAL_REVERSE_SHELL" {
   }
 }
 
+resource "lacework_query" "LW_Custom_UnrestrictedIngressToTCP3389" {
+  query_id = "LW_Custom_UnrestrictedIngressToTCP3389"
+  query    = <<EOT
+    {
+      source {
+          LW_CFG_AZURE_NETWORK_NETWORKSECURITYGROUPS a,
+          array_to_rows(a.RESOURCE_CONFIG:securityRules) as (rules)
+      }
+      filter {
+          rules:"properties".access = 'Allow'
+          and rules:"properties".direction = 'Inbound'
+          and rules:"properties".protocol = '*'
+          and rules:"properties".destinationPortRange = '3389'
+          and rules:"properties".sourceAddressPrefix = '*'
+      }
+      return distinct {
+          TENANT_ID,
+          TENANT_NAME,
+          SUBSCRIPTION_ID,
+          SUBSCRIPTION_NAME,
+          URN as RESOURCE_KEY,
+          RESOURCE_REGION,
+          RESOURCE_TYPE,
+          RESOURCE_CONFIG
+      }
+    }
+EOT
+}
+
+resource "lacework_policy" "DETC_POTENTIAL_REVERSE_SHELL" {
+  title       = "Security Groups Should Not Allow Unrestricted Ingress to TCP Port 3389"
+  description = "Security Groups Should Not Allow Unrestricted Ingress to TCP Port 3389"
+  remediation = "Investigate any suspicious activity."
+  query_id    = lacework_query.LW_Custom_UnrestrictedIngressToTCP3389.id
+  severity    = "High"
+  type        = "Violation"
+  evaluation  = "Hourly"
+  enabled     = true
+
+  alerting {
+    enabled = true
+    profile = "LW_HE_PROCESSES_DEFAULT_PROFILE.HE_Process_NewViolation"
+  }
+}
 
 output "agent-token" {
   value     = lacework_agent_access_token.detc-agent-token.token
