@@ -116,7 +116,7 @@ resource "lacework_query" "LW_Custom_UnrestrictedIngressToTCP3389" {
 EOT
 }
 
-resource "lacework_policy" "DETC_POTENTIAL_REVERSE_SHELL" {
+resource "lacework_policy" "LW_Policy_UnrestrictedIngressToTCP3389" {
   title       = "Security Groups Should Not Allow Unrestricted Ingress to TCP Port 3389"
   description = "Security Groups Should Not Allow Unrestricted Ingress to TCP Port 3389"
   remediation = "Investigate any suspicious activity."
@@ -128,7 +128,7 @@ resource "lacework_policy" "DETC_POTENTIAL_REVERSE_SHELL" {
 
   alerting {
     enabled = true
-    profile = "LW_HE_PROCESSES_DEFAULT_PROFILE.HE_Process_NewViolation"
+    profile = "LW_CFG_AZURE_DEFAULT_PROFILE.Violation"
   }
 }
 
