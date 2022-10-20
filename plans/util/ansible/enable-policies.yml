@@ -1,0 +1,34 @@
+---
+- name: Enable all Lacework Policies
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  environment:
+    LW_ACCOUNT: "{{ lacework_account_name }}"
+    LW_SUBACCOUNT: "{{ lacework_subaccount_name }}"
+    LW_API_KEY: "{{ lacework_api_key }}"
+    LW_API_SECRET: "{{ lacework_api_secret }}"
+  tasks:
+    - name: Fetch all lacework policies
+      register: policy_list
+      ansible.builtin.command:
+        argv:
+          - lacework
+          - --noninteractive
+          - --json
+          - policy
+          - list
+
+    - name: Extract Lacework policy id and enabled flag
+      set_fact:
+        policy_ids: "{{ policy_list.stdout | from_json | json_query('[*].{ policyId: policyId, enabled: enabled }') }}"
+
+    - name: Iterate over all policies and enable all disabled policies
+      ansible.builtin.command:
+        argv:
+          - lacework
+          - policy
+          - enable
+          - "{{ item.policyId }}"
+      loop: "{{ policy_ids }}"
+      when: item.enabled == false
