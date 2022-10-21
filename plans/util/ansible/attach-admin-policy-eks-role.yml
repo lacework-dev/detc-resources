@@ -1,0 +1,30 @@
+---
+- name: Attach AdministratorAccess policy to EKS role
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  environment:
+    AWS_ACCESS_KEY_ID: "{{ aws_access_key }}"
+    AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key }}"
+    AWS_DEFAULT_REGION: "{{ aws_region }}"
+  tasks:
+    - name: Fetch eks cluster role name
+      register: aws_role_names
+      ansible.builtin.command:
+        argv:
+          - aws
+          - iam
+          - list-roles
+          - --query
+          - Roles[?contains(RoleName,`primary-eks-node-group`) == `true`].RoleName
+    - name: Iterate over all policies found and attach the AdministratorAccess role
+      ansible.builtin.command:
+        argv:
+          - aws
+          - iam
+          - attach-role-policy
+          -  --policy-arn
+          - arn:aws:iam::aws:policy/AdministratorAccess
+          - --role-name
+          - "{{ item }}"
+      loop: "{{ aws_role_names.stdout | from_json }}"

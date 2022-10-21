@@ -65,3 +65,19 @@ tenant_setup:
           lacework_subaccount_name: !secret lacework.subaccount_name
           lacework_api_key: !secret lacework.api_key
           lacework_api_secret: !secret lacework.api_secret
+    - name: attach-admin-policy-eks-role
+      extension: Ansible
+      tags: lacwork
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "plans/util/ansible/"
+      args:
+        hosts: localhost
+        connection: local
+        inventory: localhost
+        playbook:
+          - attach-admin-policy-eks-role.yml
+        extra_vars:
+          aws_access_key: !secret aws.access_key
+          aws_secret_key: !secret aws.secret_key
+          aws_region: !secret aws.region
