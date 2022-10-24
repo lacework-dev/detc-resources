@@ -21,7 +21,8 @@ jenkins:
     - path: lacework.scanner_token
     - path: lacework.account_name
     - path: lacework.admission_controller_token
-    - path: windows.password 
+    - path: windows.password
+    - path: windows.username
   steps:
     - name: jenkins-vpc
       extension: VPC.AWS
@@ -201,3 +202,4 @@ jenkins:
           azure_subscription_id: !secret azure.subscription_id
 
           windows_password: !secret windows.password
+          windows_username: !secret windows.username
