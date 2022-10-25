@@ -1,5 +1,7 @@
 ---
 Dockerhub:
+  description: |
+    This plan integration Dockerhub with a Lacework tenant
   required_secrets:
     - path: lacework.account_name
       prompt: false
