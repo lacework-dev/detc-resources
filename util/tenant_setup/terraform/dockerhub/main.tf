@@ -21,7 +21,7 @@ provider "lacework" {
   api_secret = var.lacework_apisecret
 }
 
-resource "lacework_integration_docker_hub" "example" {
+resource "lacework_integration_docker_hub" "lw_docker_integration" {
   name = "Dockerhub Account Integration"
   username = var.dockerhub_user
   password = var.dockerhub_password
