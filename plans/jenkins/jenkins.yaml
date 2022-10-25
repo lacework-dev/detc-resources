@@ -11,6 +11,7 @@ jenkins:
     - path: gcp.region
     - path: dockerhub.token
     - path: dockerhub.user
+    - path: dockerhub.password
     - path: github.username
     - path: github.pat
     - path: jenkins.admin_id
@@ -21,8 +22,8 @@ jenkins:
     - path: lacework.scanner_token
     - path: lacework.account_name
     - path: lacework.admission_controller_token
-    - path: windows.password
     - path: windows.username
+    - path: windows.password
   steps:
     - name: jenkins-vpc
       extension: VPC.AWS
@@ -201,5 +202,8 @@ jenkins:
           azure_tenant_id: !secret azure.tenant_id
           azure_subscription_id: !secret azure.subscription_id
 
-          windows_password: !secret windows.password
+          dockerhub_password: !secret dockerhub.password
+          dockerhub_user: !secret dockerhub.user
+
           windows_username: !secret windows.username
+          windows_password: !secret windows.password
