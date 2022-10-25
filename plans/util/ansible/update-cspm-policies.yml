@@ -49,7 +49,7 @@
               - gcp
               - disable
               - CIS_1_0
-        - name: Disable compliance azure CIS_1_0
+        - name: Disable compliance gcp CIS_1_2
           register: policy_list
           ansible.builtin.command:
             argv:
@@ -58,4 +58,25 @@
               - compliance
               - gcp
               - disable
+              - CIS_1_2
+        - name: Disable compliance azure CIS_1_0
+          register: policy_list
+          ansible.builtin.command:
+            argv:
+              - lacework
+              - --noninteractive
+              - compliance
+              - azure
+              - disable
               - CIS_1_0
+        - name: Disable compliance azure CIS_1_3_1
+          register: policy_list
+          ansible.builtin.command:
+            argv:
+              - lacework
+              - --noninteractive
+              - compliance
+              - azure
+              - disable
+              - CIS_1_3_1
+
