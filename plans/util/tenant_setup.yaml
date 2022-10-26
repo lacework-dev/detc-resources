@@ -1,0 +1,50 @@
+---
+pre_tenant_setup:
+  description: |
+    This plan runs through a variety of setup tasks required to make the full DETC environment work properly.
+  steps:
+    - name: gcp-prereqs
+      extension: Terraform
+      tags: gcp
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "util/tenant_setup/terraform/gcp"
+      args:
+        cloud: gcp
+        outputs:
+          - service_account
+        tfvars:
+          region: !secret gcp.region
+          project: !secret gcp.project_id
+    - name: lacework-prereqs
+      extension: Terraform
+      tags: gcp
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "util/tenant_setup/terraform/lacework"
+      args:
+        cloud: aws
+        outputs:
+          - agent-token
+        tfvars:
+          lacework_account: !secret lacework.account_name
+          lacework_subaccount: !secret lacework.subaccount_name
+          lacework_apikey: !secret lacework.api_key
+          lacework_apisecret: !secret lacework.api_secret
+    - name: enable-all-policies
+      extension: Ansible
+      tags: lacwork
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "util/tenant_setup/ansible/"
+      args:
+        hosts: localhost
+        connection: local
+        inventory: localhost
+        playbook:
+          - enable-policies.yml
+        extra_vars:
+          lacework_account_name: !secret lacework.account_name
+          lacework_subaccount_name: !secret lacework.subaccount_name
+          lacework_api_key: !secret lacework.api_key
+          lacework_api_secret: !secret lacework.api_secret

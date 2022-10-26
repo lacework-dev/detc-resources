@@ -1,0 +1,36 @@
+---
+Dockerhub:
+  description: |
+    This plan integration Dockerhub with a Lacework tenant
+  required_secrets:
+    - path: lacework.account_name
+      prompt: false
+    - path: lacework.subaccount_name
+      prompt: false
+    - path: lacework.api_key
+      prompt: false
+    - path: lacework.api_secret
+      prompt: false
+    - path: dockerhub.user
+      prompt: false
+    - path: dockerhub.password
+      prompt: false
+  description: |
+    This plan integrates a Lacework tenant with a Docker Hub account
+  steps:
+    - name: integrate-lacework-with-dockerhub
+      extension: Terraform
+      tags: lacework
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "util/tenant_setup/terraform/dockerhub"
+      args:
+        cloud: aws
+        tfvars:
+          lacework_account: !secret lacework.account_name
+          lacework_subaccount: !secret lacework.subaccount_name
+          lacework_apikey: !secret lacework.api_key
+          lacework_apisecret: !secret lacework.api_secret
+          dockerhub_user: !secret dockerhub.user
+          dockerhub_password: !secret dockerhub.password
+

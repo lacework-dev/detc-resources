@@ -1,0 +1,82 @@
+---
+    - name: Enable all Lacework Policies
+      hosts: localhost
+      connection: local
+      gather_facts: false
+      environment:
+        LW_ACCOUNT: "{{ lacework_account_name }}"
+        LW_SUBACCOUNT: "{{ lacework_subaccount_name }}"
+        LW_API_KEY: "{{ lacework_api_key }}"
+        LW_API_SECRET: "{{ lacework_api_secret }}"
+      tasks:
+        - name: Enable cis-aws-1-4-0
+          register: policy_list
+          ansible.builtin.command:
+            argv:
+              - lacework
+              - --noninteractive
+              - policy
+              - enable
+              - --tag
+              - framework:cis-aws-1-4-0
+        - name: Enable aws-lacework-security-1-0
+          register: policy_list
+          ansible.builtin.command:
+            argv:
+              - lacework
+              - --noninteractive
+              - policy
+              - enable
+              - --tag
+              - framework:aws-lacework-security-1-0
+        - name: Disable compliance aws CIS_1_1
+          register: policy_list
+          ansible.builtin.command:
+            argv:
+              - lacework
+              - --noninteractive
+              - compliance
+              - aws
+              - disable
+              - CIS_1_1
+        - name: Disable compliance gcp CIS_1_0
+          register: policy_list
+          ansible.builtin.command:
+            argv:
+              - lacework
+              - --noninteractive
+              - compliance
+              - gcp
+              - disable
+              - CIS_1_0
+        - name: Disable compliance gcp CIS_1_2
+          register: policy_list
+          ansible.builtin.command:
+            argv:
+              - lacework
+              - --noninteractive
+              - compliance
+              - gcp
+              - disable
+              - CIS_1_2
+        - name: Disable compliance azure CIS_1_0
+          register: policy_list
+          ansible.builtin.command:
+            argv:
+              - lacework
+              - --noninteractive
+              - compliance
+              - azure
+              - disable
+              - CIS_1_0
+        - name: Disable compliance azure CIS_1_3_1
+          register: policy_list
+          ansible.builtin.command:
+            argv:
+              - lacework
+              - --noninteractive
+              - compliance
+              - azure
+              - disable
+              - CIS_1_3_1
+
