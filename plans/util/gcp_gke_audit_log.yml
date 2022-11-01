@@ -1,7 +1,7 @@
 ---
-aws-eks-audit-log:
+gcp-gke-audit-logs:
   description: |
-    This plan configures EKS K8s audit log integration with Lacework
+    This plan configures GKE K8s audit log integration with Lacework
   required_secrets:
     - path: lacework.account_name
       prompt: false
@@ -12,11 +12,11 @@ aws-eks-audit-log:
     - path: lacework.api_secret
       prompt: false
   steps:
-    - name: aws-eks-audit-log
+    - name: integrate-lacework-with-dockerhub
       extension: Terraform
       source:
         location: "git+https://github.com/lacework-dev/detc-resources.git"
-        subdir: "util/tenant_setup/terraform/aws_eks_audit_log"
+        subdir: "util/k8s_audit_log/terraform/gke"
       args:
         cloud: aws
         tfvars:
@@ -24,6 +24,4 @@ aws-eks-audit-log:
           lacework_subaccount: !secret lacework.subaccount_name
           lacework_apikey: !secret lacework.api_key
           lacework_apisecret: !secret lacework.api_secret
-          cluster_name: !lookup /aws-k8s/k8s/outputs/cluster_name
-          cluster_region: !lookup /aws-k8s/k8s/outputs/region
 
