@@ -1,7 +1,7 @@
 ---
-Dockerhub:
+integrate_dockerhub:
   description: |
-    This plan integration Dockerhub with a Lacework tenant
+    This plan integrates a Lacework tenant with a Docker Hub account
   required_secrets:
     - path: lacework.account_name
       prompt: false
@@ -15,8 +15,6 @@ Dockerhub:
       prompt: false
     - path: dockerhub.password
       prompt: false
-  description: |
-    This plan integrates a Lacework tenant with a Docker Hub account
   steps:
     - name: integrate-lacework-with-dockerhub
       extension: Terraform
