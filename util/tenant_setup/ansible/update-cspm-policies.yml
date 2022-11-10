@@ -29,6 +29,16 @@
               - enable
               - --tag
               - framework:aws-lacework-security-1-0
+        - name: Enable cis-gcp-1-3-0
+          register: policy_list
+          ansible.builtin.command:
+            argv:
+              - lacework
+              - --noninteractive
+              - policy
+              - enable
+              - --tag
+              - framework:cis-gcp-1-3-0
         - name: Disable compliance aws CIS_1_1
           register: policy_list
           ansible.builtin.command:
