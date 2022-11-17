@@ -131,6 +131,21 @@
     - name: Update apt repo and cache on all Debian/Ubuntu boxes
       apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
       become: true
+    - name: Setup SSH pub/priv keys pair
+      openssh_keypair:
+        path: "~/.ssh/id_rsa"
+        type: rsa
+        size: 4096
+        state: present
+        force: no
+      register: public_key
+      become: false
+    - name: copy ssh pub key locally
+      local_action:
+        module: copy
+        content: "{{ public_key.public_key }}"
+        dest: public_key
+      become: false
 
   roles:
     - role: geerlingguy.java

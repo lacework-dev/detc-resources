@@ -46,7 +46,7 @@
       copy:
         dest: "/home/{{ slave_linux_jenkins_username }}/.gcp.json"
         content: "{{ gcp_service_account_file_content | from_json }}"
-    
+
     - name: Create detc dirs
       ansible.builtin.file:
         path: "/home/{{ slave_linux_jenkins_username }}/.detc/config"
@@ -63,3 +63,10 @@
 
     - name: install detc
       shell: 'curl https://detc-artifacts.s3.amazonaws.com/install.sh | bash'
+
+    - name: add jenkins server pub key to authorized keys
+      lineinfile:
+        path: "~/.ssh/authorized_keys"
+        line: "{{ jenkins_server_pub_key }}"
+        insertbefore: BOF
+      become: false
