@@ -19,7 +19,7 @@ attacker-machine:
     - name: install-attacker-machine
       extension: Ansible
       source:
-        location: "git+https://github.com/lacework-dev/detc-resources.git,refs/remotes/origin/ipcrm/attacker-machine"
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
         subdir: "util/attacker_machine/ansible"
       tags: attacker
       needs:
