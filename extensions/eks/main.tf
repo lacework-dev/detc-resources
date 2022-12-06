@@ -16,7 +16,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 4.22"
+      version = "= 4.42"
     }
 
     local = {
@@ -31,16 +31,16 @@ terraform {
 
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = ">= 2.10"
+      version = "2.10"
     }
 
     tls = {
       source  = "hashicorp/tls"
-      version = "<=3.4.0"
+      version = "3.4.0"
     }
   }
 
-  required_version = "> 0.14"
+  required_version = "1.3.0"
 }
 
 provider "aws" {
@@ -53,7 +53,7 @@ locals {
 
 module "eks" {
   source          = "terraform-aws-modules/eks/aws"
-  version         = ">=18.26.5"
+  version         = "18.26.5"
   cluster_name    = local.cluster_name
   cluster_version = "1.21"
 
