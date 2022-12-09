@@ -14,7 +14,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">=4.28.0"
+      version = "4.45.0"
     }
   }
 
@@ -41,7 +41,7 @@ module "gke" {
 
 module "vpc" {
   source  = "terraform-google-modules/network/google"
-  version = "~> 5.1"
+  version = "5.2"
 
   project_id   = var.project
   network_name = "${var.project}-vpc"
