@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~> 2.31"
+      version = "2.31"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
