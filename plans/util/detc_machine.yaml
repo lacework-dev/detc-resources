@@ -1,0 +1,50 @@
+---
+detc-machine:
+  steps:
+    - name: detc-machine-vpc
+      extension: VPC.AWS
+      tags: infrastructure
+      args:
+        name: "detc-machine-vpc"
+    - name: detc-machine
+      extension: EC2Instance
+      tags: infra
+      needs:
+        - detc-machine-vpc
+      args:
+        ports: "22,5555"
+        vpc_id: !lookup /detc-machine-vpc/outputs/vpc_id
+        subnet: !lookup /detc-machine-vpc/outputs/subnet_id1
+        instance_name: "detc-machine"
+    - name: install-detc-machine
+      extension: Ansible
+      source:
+        # location: "git+https://github.com/lacework-dev/detc-resources.git"
+        # subdir: "util/detc_machine/ansible"
+        location: "/Users/gabe/code/detc-resources/util/detc_machine/ansible"
+      tags: deployments
+      needs:
+        - detc-machine
+      lookup:
+      helpers:
+        - helper: ServiceAvailable
+          args:
+            max_wait: 60 # seconds
+            lookup_hostname: inventory
+            port: 22
+        - helper: WriteValue
+          run_on_dryrun: true
+          args:
+            raw_value: !lookupSecret /detc-machine/outputs/pem
+            dstfile: instance.pem
+            mode: 0600
+      args:
+        private_key: instance.pem
+        user: "ubuntu"
+        playbook:
+          - setup.yaml
+        privilege_escalation:
+          become: true
+        inventory: !lookup /detc-machine/outputs/ip
+        extra_vars:
+          ssh_key_filename: /home/ubuntu/detc_machine_pem

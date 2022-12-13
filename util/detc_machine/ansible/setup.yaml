@@ -1,0 +1,16 @@
+- name: "setup detc-machine"
+  hosts: all
+  tasks:
+    - name: Install Docker
+      ansible.builtin.apt:
+        pkg:
+          - docker.io
+        update_cache: yes
+
+    - name: Create docker group
+      shell: groupadd docker
+      become: true
+      ignore_errors: true
+
+    - name: Run detc intall script
+      shell: curl https://detc-artifacts.s3.amazonaws.com/install.sh | bash
