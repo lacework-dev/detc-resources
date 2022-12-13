@@ -2,7 +2,7 @@ terraform {
   required_providers {
     lacework = {
       source  = "lacework/lacework"
-      version = "~> 1.0.1"
+      version = "1.0.1"
     }
   }
 }
@@ -23,13 +23,13 @@ provider "aws" {}
 
 module "aws_config" {
   source  = "lacework/config/aws"
-  version = "~> 0.7.1"
+  version = "0.7.1"
 }
 
 module "main_cloudtrail" {
   cloudtrail_name       = "cloudtrail-${var.lacework_subaccount}"
   source                = "lacework/cloudtrail/aws"
-  version               = "~> 2.3.1"
+  version               = "2.3.1"
   iam_role_arn          = module.aws_config.iam_role_arn
   iam_role_external_id  = module.aws_config.external_id
   iam_role_name         = module.aws_config.iam_role_name
