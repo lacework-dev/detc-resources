@@ -40,7 +40,7 @@
       register: azureVersion
 
     - debug:
-        msg: "{{azureVersion.stdout}}"  
+        msg: "{{azureVersion.stdout}}"
 
     - name: Install jq
       ansible.builtin.package:
@@ -51,6 +51,21 @@
       ansible.builtin.package:
         name: pip
         state: present
+
+    - name: Install Docker
+      ansible.builtin.package:
+        name: docker.io
+        state: present
+
+    - name: Create docker group
+      shell: groupadd docker
+      become: true
+      ignore_errors: true
+
+    - name: Add docker group to user
+      shell: usermod -aG docker ubuntu
+      become: true
+      ignore_errors: true
 
     - name: Install yq
       pip:
