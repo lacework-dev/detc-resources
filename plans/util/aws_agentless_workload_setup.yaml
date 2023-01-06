@@ -1,0 +1,18 @@
+---
+    post_tenant_setup:
+      description: |
+        This plan sets up agentless workload scanning in aws
+      steps:
+        - name: aws-agentless-workload-setup
+          extension: Terraform
+          tags: lacwork
+          source:
+            location: "git+https://github.com/lacework-dev/detc-resources.git"
+            subdir: "util/tenant_setup/terraform/lacework/agentless/aws"
+          args:
+            cloud: aws
+            tfvars:
+              lacework_account: !secret lacework.account_name
+              lacework_subaccount: !secret lacework.subaccount_name
+              lacework_apikey: !secret lacework.api_key
+              lacework_apisecret: !secret lacework.api_secret
