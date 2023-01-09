@@ -24,6 +24,16 @@ provider "aws" {
 }
 
 provider "aws" {
+  alias  = "use2"
+  region = "us-east-2"
+}
+
+provider "aws" {
+  alias  = "usw1"
+  region = "us-west-1"
+}
+
+provider "aws" {
   alias  = "usw2"
   region = "us-west-2"
 }
@@ -42,7 +52,7 @@ module "lacework_aws_agentless_scanning_global" {
 // This creates an ECS cluster, a VPC and VPC IG for that cluster, and an EventBridge trigger in this region.
 // The trigger will start a periodic Task to snapshot and analyze EC2 volumes in this region.
 
-// Create regional resources in our first region
+// Create regional resources us-east-1
 module "lacework_aws_agentless_scanning_region" {
   source  = "lacework/agentless-scanning/aws"
   version = "~> 0.6"
@@ -51,7 +61,33 @@ module "lacework_aws_agentless_scanning_region" {
   global_module_reference = module.lacework_aws_agentless_scanning_global
 }
 
-// Create regional resources in our second region
+// Create regional resources us-east-2
+module "lacework_aws_agentless_scanning_region_use2" {
+  source  = "lacework/agentless-scanning/aws"
+  version = "~> 0.6"
+
+  providers = {
+    aws = aws.use2
+  }
+
+  regional                = true
+  global_module_reference = module.lacework_aws_agentless_scanning_global
+}
+
+// Create regional resources us-west-1
+module "lacework_aws_agentless_scanning_region_usw1" {
+  source  = "lacework/agentless-scanning/aws"
+  version = "~> 0.6"
+
+  providers = {
+    aws = aws.usw1
+  }
+
+  regional                = true
+  global_module_reference = module.lacework_aws_agentless_scanning_global
+}
+
+// Create regional resources us-west-2
 module "lacework_aws_agentless_scanning_region_usw2" {
   source  = "lacework/agentless-scanning/aws"
   version = "~> 0.6"
@@ -62,6 +98,4 @@ module "lacework_aws_agentless_scanning_region_usw2" {
 
   regional                = true
   global_module_reference = module.lacework_aws_agentless_scanning_global
-  // In this example the default VPC CIDR block is customized for this region.
-  vpc_cidr_block          = "10.10.34.0/24"
 }

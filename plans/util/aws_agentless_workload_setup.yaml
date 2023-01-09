@@ -1,5 +1,5 @@
 ---
-    post_tenant_setup:
+    lacework_aws_agentless_scanning:
       description: |
         This plan sets up agentless workload scanning in aws
       steps:
