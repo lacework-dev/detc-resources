@@ -1,0 +1,21 @@
+lacework-gcp-agentless:
+  required_secrets:
+    - path: gcp.project_id
+      prompt: false
+  description: |
+    This plan sets up agentless workload scanning in GCP
+  steps:
+    - name: gcp-agentless-workload-setup
+      extension: Terraform
+      tags: lacework
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "util/lacework/agentless/gcp"
+      args:
+        cloud: gcp
+        tfvars:
+          gcp_project_filter_list: !secret gcp.project_id
+          lacework_account: !secret lacework.account_name
+          lacework_subaccount: !secret lacework.subaccount_name
+          lacework_apikey: !secret lacework.api_key
+          lacework_apisecret: !secret lacework.api_secret
