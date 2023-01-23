@@ -13,6 +13,21 @@ args:     # These automatically get passed through to the underlying ext as args
   ports:
     type: string
     required: false
+  security_group_arns:
+    type: string
+    required: false
+  instance_profile_arn:
+    type: string
+    required: false
+  instance_type: 
+    type: string
+    required: false
+  public_ip: 
+    type: string
+    required: false
+  root_vol_size:
+    type: string
+    required: false
 source: # Where to get the code the underlying ext should run
   location: "git+https://github.com/lacework-dev/detc-resources.git"
   subdir: "extensions/ec2instance"
