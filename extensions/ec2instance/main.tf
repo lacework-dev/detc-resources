@@ -1,9 +1,12 @@
 variable "vpc_id" {}
 variable "subnet" {}
 variable "instance_name" {}
-variable "ports" {
-  default = "22"
-}
+variable "ports" { default = "22" }
+variable "security_group_arns" { default = "" }
+variable "instance_profile_arn" { default = "" }
+variable "instance_type" { default = "t2.medium" }
+variable "public_ip" { default = true }
+variable "root_vol_size" { default = 40 }
 
 resource "tls_private_key" "keypair" {
   algorithm = "RSA"
@@ -31,7 +34,8 @@ data "aws_ami" "ubuntu" {
 }
 
 locals {
-  split_ports = split(",", var.ports)
+  split_ports   = split(",", var.ports)
+  split_sg_arns = split(",", var.security_group_arns)
 }
 
 resource "aws_security_group" "ingress-from-all" {
@@ -62,13 +66,14 @@ resource "aws_instance" "instance-server" {
     "Hostname" = "${var.instance_name}"
   }
   ami                         = data.aws_ami.ubuntu.id
-  instance_type               = "t2.medium"
-  associate_public_ip_address = true
+  instance_type               = var.instance_type
+  associate_public_ip_address = tobool(var.public_ip)
   subnet_id                   = var.subnet
-  vpc_security_group_ids      = [aws_security_group.ingress-from-all.id]
+  vpc_security_group_ids      = compact(concat([aws_security_group.ingress-from-all.id], local.split_sg_arns))
+  iam_instance_profile        = var.instance_profile_arn
 
   root_block_device {
-    volume_size = 40
+    volume_size = tonumber(var.root_vol_size)
   }
 
   key_name   = "${var.instance_name}-server-key"
