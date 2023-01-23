@@ -1,0 +1,14 @@
+---
+  - name: "Generate SSH key pair locally"
+    hosts: localhost
+    connection: local
+    tasks:
+    - name: Setup SSH pub/priv keys pair
+      openssh_keypair:
+        path: "id_rsa"
+        type: rsa
+        size: 4096
+        state: present
+        force: no
+      register: public_key
+      become: false

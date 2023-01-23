@@ -1,0 +1,61 @@
+- name: "Install jenkins-sidecar"
+  hosts: all
+
+  tasks:
+    - name: Install repo for Java 8 in Ubuntu
+      apt_repository: repo='ppa:openjdk-r/ppa'
+
+    - name: Update repositories cache and install gcloud packages
+      ansible.builtin.apt:
+        pkg:
+          - maven
+          - default-jre
+        update_cache: yes
+
+    - name: Git clone jenkins-sidecar project
+      ansible.builtin.git:
+        repo: 'https://github.com/lacework-demo/jenkins-sidecar.git'
+        dest: ./
+
+    - name: Fetch hibernate config file
+      fetch:
+        src: "jenkins-sidecar/src/main/resources/hibernate.cfg.xml"
+        dest: "hibernate.cfg.xml"
+        flat: yes
+
+    - name: Apply template to hibernate config file
+      template:
+        src: hibernate.cfg.xml
+        dest: jenkins-sidecar/src/main/resources/hibernate.cfg.xml
+
+    - name: Build jenkins-sidecar
+      ansible.builtin.command:
+        argv:
+          - mvn
+          - clean
+          - package
+      args:
+        chdir: jenkins-sidecar/
+
+    - name: Write systemd config file
+      blockinfile:
+        path: /etc/systemd/system/jenkins-sidecar.service
+        create: true
+        state: present
+        block: |
+          [Unit]
+          Description=Jenkins Sidecar
+          [Service]
+          PIDFile=/tmp/jenkins-sidecar-98.pid
+          Restart=always
+          KillSignal=SIGQUIT
+          WorkingDirectory=/home/ubuntu/jenkins-sidecar
+          ExecStart=java --add-opens java.base/java.lang=ALL-UNNAMED -jar target/example-app-1.0-SNAPSHOT-jar-with-dependencies.jar
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Make sure a service unit is running
+      ansible.builtin.systemd:
+        name: jenkins-sidecar.service
+        enabled: yes
+        state: started

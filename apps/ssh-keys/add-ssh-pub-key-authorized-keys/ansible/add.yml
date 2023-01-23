@@ -1,0 +1,10 @@
+---
+  - name: "Add SSH public key to .ssh/authorized_keys file"
+    hosts: all
+    tasks:
+    - name: add ssh pub key to authorized keys
+      lineinfile:
+        path: "~/.ssh/authorized_keys"
+        line: "{{ add_pub_key }}"
+        insertbefore: BOF
+      become: false

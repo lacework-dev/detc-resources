@@ -1,0 +1,9 @@
+---
+  - name: "Add SSH private key to host in the .ssh directory"
+    hosts: all
+    tasks:
+    - name: add ssh private key
+      copy:
+        content: "{{ add_private_key }}"
+        dest: "~/.ssh/{{ private_key_name }}"
+      become: false
