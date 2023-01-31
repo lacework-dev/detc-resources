@@ -12,7 +12,7 @@ gcp-gke-audit-logs:
     - path: lacework.api_secret
       prompt: false
   steps:
-    - name: integrate-lacework-with-dockerhub
+    - name: gke-audit-log-setup
       extension: Terraform
       source:
         location: "git+https://github.com/lacework-dev/detc-resources.git"
