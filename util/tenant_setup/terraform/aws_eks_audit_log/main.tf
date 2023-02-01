@@ -22,12 +22,7 @@ provider "lacework" {
 }
 
 provider "aws" {
-    version = "4.38.0"
-}
-
-module "aws_config" {
-  source  = "lacework/config/aws"
-  version = "0.7.1"
+  version = "4.38.0"
 }
 
 module "aws_eks_audit_log" {
