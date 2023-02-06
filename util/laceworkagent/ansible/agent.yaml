@@ -1,0 +1,77 @@
+- hosts: all
+  vars:
+    access_token: "{{ lacework_access_token }}"
+    enable_caa: "{{ lacework_enable_caa | default(false) }}"
+    syscall_template: "{{ lacework_syscall_template | default(undefined) }}"
+    api_server: "{{ lacework_api_server | default('https://api.lacework.net/')}}"
+    agent_version: "{{ lacework_agent_version | default('latest') }}"
+    msi_url: "{{ lacework_msi_url | default(false) }}"
+    msi_final_url: "{% if msi_url %}{{ msi_url }}{% elif agent_version != 'latest' %}https://updates.lacework.net/{{ agent_version }}/LWDataCollector.msi{% else %}https://updates.lacework.net/windows/latest/LWDataCollector.msi{% endif %}"
+  tasks:
+  - name: Update apt repo and cache on all Debian/Ubuntu boxes
+    apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+    become: true
+    when: ansible_system | lower == 'linux'
+  - name: add apt signing key
+    apt_key:
+      keyserver: hkp://keyserver.ubuntu.com:80
+      id: EE0CC692
+      state: present
+    become: true
+    when: ansible_system | lower == 'linux'
+  - name: add latest lacework repository into source list
+    apt_repository:
+      repo: "deb [arch=amd64] https://packages.lacework.net/latest/DEB/{{ ansible_distribution | lower  }} {{ ansible_distribution_release }} main"
+      filename: lacework
+      state: present
+      update_cache: yes
+    become: true
+    when: ansible_system | lower == 'linux'
+  - name: add established lacework repository into source list
+    apt_repository:
+      repo: "deb [arch=amd64] https://packages.lacework.net/established/DEB/{{ ansible_distribution | lower  }} {{ ansible_distribution_release }} main"
+      filename: lacework
+      state: present
+      update_cache: yes
+    become: true
+    when: ansible_system | lower == 'linux'
+  - name: add archived lacework repository into source list
+    apt_repository:
+      repo: "deb [arch=amd64] https://packages.lacework.net/archived/DEB/{{ ansible_distribution | lower  }} {{ ansible_distribution_release }} main"
+      filename: lacework
+      state: present
+      update_cache: yes
+    become: true
+    when: ansible_system | lower == 'linux'
+  - name: install lacework datacollector
+    apt:
+      name: "{% if agent_version != 'latest'%}lacework={{ agent_version }}{% else %}lacework{% endif %}"
+      allow_downgrade: true
+      state: present
+    become: true
+    when: ansible_system | lower == 'linux'
+  - name: wait until /var/lib/lacework/config/ is created
+    wait_for:
+      path: /var/lib/lacework/config/
+    when: ansible_system | lower == 'linux'
+    become: true
+  - name: write config.json
+    template:
+      src: config.j2
+      dest: /var/lib/lacework/config/config.json
+    become: true
+    when: ansible_system | lower == 'linux'
+  - name: write syscall_config.yaml
+    template:
+      src: "{{ syscall_template }}"
+      dest: /var/lib/lacework/config/syscall_config.yaml
+    become: true
+    when: ansible_system | lower == 'linux' and syscall_template is defined
+
+  - name: Install Lacework Agent MSI
+    ansible.windows.win_package:
+      path: "{{ msi_final_url }}"
+      arguments:
+      - ACCESSTOKEN={{ access_token }}
+      - SERVERURL={{ api_server }}
+    when: ansible_system | lower == 'win32nt'
