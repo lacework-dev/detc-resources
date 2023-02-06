@@ -1,0 +1,33 @@
+etype.exec:
+etype.initmod:
+etype.finitmod:
+etype.file:
+    send-if-matches:
+        user-authorized-keys:
+            watchpath: /home/*/.ssh/authorized_keys
+            watchfor: create, modify
+        root-authorized-keys:
+            watchpath: /root/.ssh/authorized_keys
+            watchfor: create, modify
+        cronfiles:
+            watchpath: /etc/cron*
+            depth: 2
+        systemd:
+            watchpath: /etc/systemd/*
+            depth: 2
+        boot-initd:
+            watchpath: /etc/init.d/*
+            depth: 2
+        boot-rc:
+            watchpath: /etc/rc*
+            depth: 2
+        shadow-file:
+            watchpath: /etc/shadow*
+        watchlacework:
+            watchpath: /var/lib/lacework
+            depth: 2
+        watchpasswd:
+            watchpath: /etc/passwd
+        watchsshconfig:
+            watchpath: /etc/ssh/sshd_config
+            watchfor: create, modify
