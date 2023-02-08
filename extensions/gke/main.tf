@@ -14,7 +14,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "4.45.0"
+      version = ">= 4.45.0, <= 4.52.0"
     }
   }
 
@@ -28,6 +28,7 @@ provider "google" {
 
 module "gke" {
   source            = "terraform-google-modules/kubernetes-engine/google"
+  version           = "24.1.0"
   project_id        = var.project
   name              = var.cluster_name
   region            = var.region
@@ -71,6 +72,7 @@ module "vpc" {
 module "gke_auth" {
   source     = "terraform-google-modules/kubernetes-engine/google//modules/auth"
   depends_on = [module.gke]
+  version    = "24.1.0"
 
   project_id           = var.project
   cluster_name         = var.cluster_name
