@@ -8,34 +8,26 @@
     - name: Update repositories cache and install gcloud packages
       ansible.builtin.apt:
         pkg:
-          - maven
           - default-jre
         update_cache: yes
 
-    - name: Git clone jenkins-sidecar project
-      ansible.builtin.git:
-        repo: 'https://github.com/lacework-demo/jenkins-sidecar.git'
-        dest: ./
+    - name: Create sidecar folder
+      file:
+        path: jenkins-sidecar
 
-    - name: Fetch hibernate config file
-      fetch:
-        src: "jenkins-sidecar/src/main/resources/hibernate.cfg.xml"
-        dest: "hibernate.cfg.xml"
-        flat: yes
+    - name: Download jenkins-sidecar jar file
+      ansible.builtin.get_url:
+        url: https://github.com/lacework-demo/jenkins-sidecar/releases/download/latest/jenkins-sidecar-1.0-SNAPSHOT-jar-with-dependencies.jar
+        dest: jenkins-sidecar/
+
+    - name: Create sidecar config folder
+      file:
+        path: jenkins-sidecar/config
 
     - name: Apply template to hibernate config file
       template:
-        src: hibernate.cfg.xml
-        dest: jenkins-sidecar/src/main/resources/hibernate.cfg.xml
-
-    - name: Build jenkins-sidecar
-      ansible.builtin.command:
-        argv:
-          - mvn
-          - clean
-          - package
-      args:
-        chdir: jenkins-sidecar/
+        src: templates/hibernate.cfg.xml
+        dest: jenkins-sidecar/config/hibernate.cfg.xml
 
     - name: Write systemd config file
       blockinfile:
@@ -50,7 +42,7 @@
           Restart=always
           KillSignal=SIGQUIT
           WorkingDirectory=/home/ubuntu/jenkins-sidecar
-          ExecStart=java --add-opens java.base/java.lang=ALL-UNNAMED -jar target/example-app-1.0-SNAPSHOT-jar-with-dependencies.jar
+          ExecStart=java --add-opens java.base/java.lang=ALL-UNNAMED -jar jenkins-sidecar-1.0-SNAPSHOT-jar-with-dependencies.jar
           [Install]
           WantedBy=multi-user.target
 

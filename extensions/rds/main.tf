@@ -3,26 +3,37 @@ variable "subnet1" {}
 variable "subnet2" {}
 variable "username" {}
 variable "password" {}
+variable "name" {}
+variable "publicly_accessible" { defualt = false }
+variable "tags" { default = "" }
+
+
+locals {
+   new_tags = split(",", var.tags)
+ }
 
 resource "aws_db_subnet_group" "db_subnet_group" {
-  name       = "rds"
+  name       = "${var.name}-subnet-grp"
   subnet_ids = [var.subnet1, var.subnet2]
-  tags = {
-    Name = "Jenkins"
-  }
+  tags = merge({ "Name" = "${var.name}" }, {
+     for t in local.new_tags : element(split("=", t), 0) => element(split("=", t), 1) if t != ""
+   })
 }
 
 resource "aws_db_parameter_group" "db_parameter_group" {
-  name   = "rds"
+  name   = "${var.name}-db-param-grp"
   family = "postgres14"
   parameter {
     name  = "log_connections"
     value = "1"
   }
+  tags = merge({ "Name" = "${var.name}" }, {
+     for t in local.new_tags : element(split("=", t), 0) => element(split("=", t), 1) if t != ""
+   })
 }
 
 resource "aws_security_group" "rds" {
-  name   = "ds"
+  name   = "${var.name}-rds-sec-grp"
   vpc_id = var.vpc_id
 
   ingress {
@@ -39,13 +50,13 @@ resource "aws_security_group" "rds" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = "rds"
-  }
+  tags = merge({ "Name" = "${var.name}" }, {
+     for t in local.new_tags : element(split("=", t), 0) => element(split("=", t), 1) if t != ""
+   })
 }
 
 resource "aws_db_instance" "rds" {
-  identifier             = "rds"
+  identifier             = var.name
   instance_class         = "db.t3.micro"
   allocated_storage      = 5
   engine                 = "postgres"
@@ -55,8 +66,11 @@ resource "aws_db_instance" "rds" {
   db_subnet_group_name   = aws_db_subnet_group.db_subnet_group.name
   vpc_security_group_ids = [aws_security_group.rds.id]
   parameter_group_name   = aws_db_parameter_group.db_parameter_group.name
-  publicly_accessible    = false
+  publicly_accessible    = var.publicly_accessible
   skip_final_snapshot    = true
+  tags = merge({ "Name" = "${var.name}" }, {
+     for t in local.new_tags : element(split("=", t), 0) => element(split("=", t), 1) if t != ""
+   })
 }
 
 output "address" {

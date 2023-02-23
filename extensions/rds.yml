@@ -1,9 +1,18 @@
 ---
 name: RDS # Name you'll reference this ext as
 args:     # These automatically get passed through to the underlying ext as args
+  name:
+    type: bool
+    required: true
   vpc_id:
     type: string
     required: true
+  publicly_accessible:
+    type: string
+    required: false
+  tags: ### key=value,key=value,...
+     type: string
+     required: false
 source: # Where to get the code the underlying ext should run
   location: "git+https://github.com/lacework-dev/detc-resources.git"
   subdir: "extensions/rds"
