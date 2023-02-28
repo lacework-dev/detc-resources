@@ -12,8 +12,10 @@
         update_cache: yes
 
     - name: Create sidecar folder
-      file:
+      ansible.builtin.file:
         path: jenkins-sidecar
+        state: directory
+        mode: '0755'
 
     - name: Download jenkins-sidecar jar file
       ansible.builtin.get_url:
@@ -21,8 +23,10 @@
         dest: jenkins-sidecar/
 
     - name: Create sidecar config folder
-      file:
+      ansible.builtin.file:
         path: jenkins-sidecar/config
+        state: directory
+        mode: '0755'
 
     - name: Apply template to hibernate config file
       template:
