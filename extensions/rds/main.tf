@@ -4,20 +4,20 @@ variable "subnet2" {}
 variable "username" {}
 variable "password" {}
 variable "name" {}
-variable "publicly_accessible" { defualt = false }
+variable "publicly_accessible" { default = false }
 variable "tags" { default = "" }
 
 
 locals {
-   new_tags = split(",", var.tags)
- }
+  new_tags = split(",", var.tags)
+}
 
 resource "aws_db_subnet_group" "db_subnet_group" {
   name       = "${var.name}-subnet-grp"
   subnet_ids = [var.subnet1, var.subnet2]
   tags = merge({ "Name" = "${var.name}" }, {
-     for t in local.new_tags : element(split("=", t), 0) => element(split("=", t), 1) if t != ""
-   })
+    for t in local.new_tags : element(split("=", t), 0) => element(split("=", t), 1) if t != ""
+  })
 }
 
 resource "aws_db_parameter_group" "db_parameter_group" {
@@ -28,8 +28,8 @@ resource "aws_db_parameter_group" "db_parameter_group" {
     value = "1"
   }
   tags = merge({ "Name" = "${var.name}" }, {
-     for t in local.new_tags : element(split("=", t), 0) => element(split("=", t), 1) if t != ""
-   })
+    for t in local.new_tags : element(split("=", t), 0) => element(split("=", t), 1) if t != ""
+  })
 }
 
 resource "aws_security_group" "rds" {
@@ -51,8 +51,8 @@ resource "aws_security_group" "rds" {
   }
 
   tags = merge({ "Name" = "${var.name}" }, {
-     for t in local.new_tags : element(split("=", t), 0) => element(split("=", t), 1) if t != ""
-   })
+    for t in local.new_tags : element(split("=", t), 0) => element(split("=", t), 1) if t != ""
+  })
 }
 
 resource "aws_db_instance" "rds" {
@@ -69,8 +69,8 @@ resource "aws_db_instance" "rds" {
   publicly_accessible    = var.publicly_accessible
   skip_final_snapshot    = true
   tags = merge({ "Name" = "${var.name}" }, {
-     for t in local.new_tags : element(split("=", t), 0) => element(split("=", t), 1) if t != ""
-   })
+    for t in local.new_tags : element(split("=", t), 0) => element(split("=", t), 1) if t != ""
+  })
 }
 
 output "address" {

@@ -31,7 +31,7 @@ jenkins:
       extension: Ansible
       source:
         location: "git+https://github.com/lacework-dev/detc-resources.git"
-        subdir: "utils/ssh-keys/generate-key-pair/ansible"
+        subdir: "util/ssh-keys/generate-key-pair/ansible"
       tags: jenkins
       lookup:
       helpers:
@@ -61,6 +61,7 @@ jenkins:
         subnet2: !lookup /jenkins-vpc/outputs/subnet_id2
         username: !secret rds.username
         password: !secret rds.password
+        name: "jenkinsdb"
     - name: jenkins-vpc
       extension: VPC.AWS
       tags: infrastructure
@@ -99,7 +100,7 @@ jenkins:
         - jenkins-agent-primary
       source:
         location: "git+https://github.com/lacework-dev/detc-resources.git"
-        subdir: "utils/ssh-keys/add-ssh-pub-key-authorized-keys/ansible"
+        subdir: "util/ssh-keys/add-ssh-private-key-file/ansible"
       tags: ssh
       lookup:
       helpers:
@@ -137,7 +138,7 @@ jenkins:
         - jenkins-agent-2
       source:
         location: "git+https://github.com/lacework-dev/detc-resources.git"
-        subdir: "utils/ssh-keys/add-ssh-pub-key-authorized-keys/ansible"
+        subdir: "util/ssh-keys/add-ssh-pub-key-authorized-keys/ansible"
       tags: ssh
       lookup:
       helpers:
@@ -175,7 +176,7 @@ jenkins:
         - jenkins-agent-3
       source:
         location: "git+https://github.com/lacework-dev/detc-resources.git"
-        subdir: "utils/ssh-keys/add-ssh-pub-key-authorized-keys/ansible"
+        subdir: "util/ssh-keys/add-ssh-pub-key-authorized-keys/ansible"
       tags: ssh
       lookup:
       helpers:
@@ -293,7 +294,7 @@ jenkins:
         - jenkins-server
       source:
         location: "git+https://github.com/lacework-dev/detc-resources.git"
-        subdir: "utils/ssh-keys/add-ssh-private-key-file/ansible"
+        subdir: "util/ssh-keys/add-ssh-private-key-file/ansible"
       tags: ssh
       lookup:
       helpers:
