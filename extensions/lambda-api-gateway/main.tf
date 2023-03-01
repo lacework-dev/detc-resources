@@ -4,6 +4,14 @@ variable "lambda_name" {}
 variable "api_endpoint_name" {}
 variable "lambda_runtime" {}
 variable "lambda_handler" {}
+variable "vpc_id" {}
+variable "subnet_0" {}
+variable "subnet_1" {}
+variable "tags" { default = "" }
+
+locals {
+   new_tags = split(",", var.tags)
+}
 
 provider "aws" {}
 
@@ -24,6 +32,11 @@ resource "aws_iam_role" "lambda_role" {
   ]
 }
 EOF
+}
+
+resource "aws_iam_role_policy_attachment" "admin" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
 resource "aws_iam_policy" "iam_policy_for_lambda" {
@@ -65,6 +78,28 @@ data "archive_file" "zip_the_python_code" {
   output_path = "lambda.zip"
 }
 
+resource "aws_default_security_group" "lambda_security_group" {
+  vpc_id = var.vpc_id
+
+  ingress {
+    protocol  = -1
+    self      = true
+    from_port = 0
+    to_port   = 0
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge({ "Name" =  "${var.lambda_name}-security-group" }, {
+     for t in local.new_tags : element(split("=", t), 0) => element(split("=", t), 1) if t != ""
+  })
+}
+
 resource "aws_lambda_function" "lambda_func" {
   filename      = "lambda.zip"
   function_name = var.lambda_name
@@ -76,6 +111,11 @@ resource "aws_lambda_function" "lambda_func" {
     variables = {
       BUCKET_NAME = var.bucket_name
     }
+  }
+
+  vpc_config {
+    subnet_ids         = [var.subnet_0, var.subnet_1]
+    security_group_ids = [aws_default_security_group.lambda_security_group.id]
   }
 }
 
