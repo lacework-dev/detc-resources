@@ -1,5 +1,20 @@
 ---
 azure-k8s:
+  required_secrets:
+    - path: lacework.access_token
+      description: lacework agent token
+    - path: lacework.api_url
+      description: lacework API url
+      default: https://api.lacework.net
+    - path: lacework.k8s_use_kubectl_agent
+      description: use legacy kubectl agent install instead of helm
+      default: false
+    - path: aks.enable_cluster_agent
+      description: enable collection agent
+      default: false
+    - path: lacework.deploy_agent
+      description: deploy lacework agent
+      default: true
   steps:
     - name: k8s
       extension: AKS
@@ -10,8 +25,12 @@ azure-k8s:
         azure_subscription_id: !secret azure.subscription_id
         azure_tenant_id: !secret azure.tenant_id
         azure_location: !secret azure.region
-    - name: lacework
+
+    - name: lacework-agent-legacy
       extension: Kubectl
+      condition: 
+        - !secret lacework.k8s_use_kubectl_agent == true
+        - !secret lacework.deploy_agent == true
       description: This step deploys Lacework instrumentation to an existing K8s cluster
       tags: monitoring
       source:
@@ -32,3 +51,40 @@ azure-k8s:
         kubectl_config_file: kubectl
         kube_manifest_path: "."
         cluster_name: sharedaks
+   
+    - name: lacework-agent
+      extension: Helm
+      condition:
+        - !secret lacework.k8s_use_kubectl_agent != true
+        - !secret lacework.deploy_agent == true
+      source:
+        location: https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/lacework-agent-helm/values.yaml
+        templates:
+          - values.yaml
+      needs:
+        - k8s
+      helpers:
+        - helper: WriteValue
+          run_on_dryrun: true
+          args:
+            raw_value: !lookup /k8s/outputs/kubectl_config
+            dstfile: kube.conf
+      args:
+        kubectl_config_file: kube.conf
+        repos:
+          - name: lacework
+            url: https://lacework.github.io/helm-charts
+        name: lacework-agent
+        namespace: lacework
+        chart: lacework/lacework-agent
+        region: !secret aws.region
+        value_files:
+          - values.yaml
+        cluster_type: aks
+        cluster_name: !lookup /k8s/outputs/cluster_name
+        access_token: !secret lacework.access_token
+        enable_cluster_agent: !secret aks.enable_cluster_agent
+        api_url: !secret lacework.api_url
+        # cluster_agent_tag:
+        # agent_tag: (datacollector)
+
