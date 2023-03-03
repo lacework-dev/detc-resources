@@ -4,6 +4,31 @@ args:
    region:
     type: string
     required: true
+   bucket_name:
+    type: string
+    required: true
+   lambda_name:
+    type: string
+    required: true
+   api_endpoint_name:
+    type: string
+    required: true
+   lambda_handler:
+    type: string
+    required: true
+   lambda_runtime:
+    type: string
+    required: true
+   vpc_id:
+    type: string
+    required: true
+   subnet_0:
+    type: string
+    required: true
+   subnet_1:
+    type: string
+    required: true
+
 source:
   location: "git+https://github.com/lacework-dev/detc-resources.git"
   subdir: "extensions/lambda-api-gateway/"
