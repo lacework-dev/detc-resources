@@ -26,6 +26,8 @@ jenkins:
     - path: windows.password
     - path: rds.username
     - path: rds.password
+    - path: lacework.deploy_agent
+      default: true
   steps:
     - name: generate-ssh-key-pair
       extension: Ansible
@@ -321,8 +323,10 @@ jenkins:
     - name: install-jenkins-agent
       extension: Ansible
       source:
-        location: "git+https://github.com/lacework-dev/detc-resources.git"
-        subdir: "apps/jenkins/ansible"
+        - location: "git+https://github.com/lacework-dev/detc-resources.git"
+          subdir: "apps/jenkins/ansible"
+        - location: "git+https://github.com/lacework-dev/detc-resources.git"
+          subdir: "util/laceworkagent/ansible"
       tags: jenkins
       needs:
         - jenkins-server-security-group
@@ -353,7 +357,7 @@ jenkins:
         playbook:
           - docker.yml
           - jenkins_agent.yml
-          - lacework.yml
+          - agent.yaml
           - jenkins_sidecar.yml
         inventory:
           - !lookup /jenkins-agent-primary/outputs/ip
@@ -370,8 +374,10 @@ jenkins:
           slave_linux_jenkins_username: ubuntu
           slave_linux_user_group: ubuntu
           slave_linux_jenkins_public_key: !lookupSecret /jenkins-agent-primary/outputs/public_key
-          lacework_access_token: !secret lacework.access_token
           lacework_admission_controller_token: !secret lacework.admission_controller_token
+
+          lacework_deploy_agent: !secret lacework.deploy_agent
+          lacework_access_token: !secret lacework.access_token
 
           aws_access_key: !lookupSecret /jenkins-server-security-group/outputs/aws_access_key
           aws_secret_key: !lookupSecret /jenkins-server-security-group/outputs/aws_secret_key

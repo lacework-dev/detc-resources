@@ -5,6 +5,10 @@ VoteAppAKS:
       prompt: true
     - path: windows.password
       prompt: true
+    - path: lacework.access_token
+      prompt: true
+    - path: lacework.deploy_agent
+      default: true
   needs:
     - azure-k8s
   steps:
@@ -104,8 +108,10 @@ VoteAppAKS:
     - name: voteapp-worker-provision
       extension: Ansible
       source:
-        location: "git+https://github.com/lacework-dev/detc-resources.git"
-        subdir: "apps/voteapp/ansible"
+        - location: "git+https://github.com/lacework-dev/detc-resources.git"
+          subdir: "apps/voteapp/ansible"
+        - location: "git+https://github.com/lacework-dev/detc-resources.git"
+          subdir: "util/laceworkagent/ansible"
       needs:
         - voteapp-worker-instance
       helpers:
@@ -118,9 +124,12 @@ VoteAppAKS:
         user: !lookup /voteapp-worker-instance/outputs/user
         winrm: true
         winrm_password: !lookupSecret /voteapp-worker-instance/outputs/password
-        playbook: voteapp_worker.yml
+        playbook:
+          - voteapp_worker.yml
+          - agent.yaml
         extra_vars:
-          access_token: !secret lacework.access_token
+          lacework_deploy_agent: !secret lacework.deploy_agent
+          lacework_access_token: !secret lacework.access_token
           windows_password: !secret windows.password
           windows_username: !secret windows.username
           db_pod_ip: !lookup /voteapp/outputs/voteapp-db
