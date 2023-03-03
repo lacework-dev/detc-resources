@@ -1,14 +1,20 @@
 laceworkConfig:
-  serverUrl: https://{{ .account_name }}.lacework.net
+  serverUrl: {{ or .api_url "https://api.lacework.net" }}
   accessToken: {{ .access_token }}
   kubernetesCluster: {{ .cluster_name }}
+{{ if .enable_cluster_agent }}
 clusterAgent:
   enable: True
   image:
+    tag: {{ or .cluster_agent_tag "latest" }}
     repository: "lacework/k8scollector"
-  clusterType: eks
+  clusterType: {{ .cluster_type }}
   clusterRegion: {{ .region }}
+{{ end }}
+{{ if not .enable_cluster_agent }}
+clusterAgent:
+  enable: False
+{{ end }}
 image:
   repository: "lacework/datacollector"
-
-
+  tag: {{ or .agent_tag "latest" }}
