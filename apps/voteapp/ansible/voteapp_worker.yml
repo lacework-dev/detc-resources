@@ -92,12 +92,3 @@
         script: |
           Import-Module WebAdministration
           Set-ItemProperty IIS:\AppPools\DefaultAppPool -name processModel -value @{userName="{{ windows_username }}";password="{{ windows_password }}";identitytype=3}
-
-- name: install lacework agent
-  hosts: all
-  tasks:
-    - name: Install Lacework Agent MSI
-      ansible.windows.win_package:
-        path: https://updates.lacework.net/windows/GA-1.0.0.2345/LWDataCollector.msi
-        arguments:
-        - ACCESSTOKEN={{ access_token }}
