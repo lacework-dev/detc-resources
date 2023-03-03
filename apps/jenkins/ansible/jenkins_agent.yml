@@ -1,6 +1,5 @@
 - name: "Install jenkins-agent"
   hosts: all
-
   tasks:
     - name: installing repo for Java 8 in Ubuntu
       apt_repository: repo='ppa:openjdk-r/ppa'
@@ -20,9 +19,11 @@
         update_cache: yes
 
   vars:
+    agent_name: "{{'agent2' if (ansible_ssh_host == jenkins_agent_2_ip) else ('agent3' if (ansible_ssh_host == jenkins_agent_3_ip) else 'agent'  ) }}"
     master_host: "{{ jenkins_server_url }}"
     master_user: "{{ jenkins_admin_id }}"
     master_password:  "{{ jenkins_admin_pass }}"
+    slave_agent_name: "{{ agent_name }}"
     slave_linux_jenkins_cred_id: "jenkins-agents"
     slave_linux_jenkins_username: "{{ slave_linux_jenkins_username }}"
     slave_linux_jenkins_group: "docker"
@@ -38,7 +39,6 @@
     - role: geerlingguy.nodejs
     - role: lean_delivery.jenkins_slave
 
-
 - name: "Setup DETC Tool"
   hosts: all
   tasks:
@@ -46,6 +46,7 @@
       copy:
         dest: "/home/{{ slave_linux_jenkins_username }}/.gcp.json"
         content: "{{ gcp_service_account_file_content | from_json }}"
+      when: ansible_ssh_host == jenkins_primary_ip
 
     - name: Create detc dirs
       ansible.builtin.file:
@@ -53,6 +54,7 @@
         state: directory
         mode: '0755'
         owner: "{{ slave_linux_jenkins_username }}"
+      when: ansible_ssh_host == jenkins_primary_ip
 
     - name: create detc config
       template:
@@ -60,9 +62,11 @@
         dest: "/home/{{ slave_linux_jenkins_username }}/.detc/config/default.toml"
         mode: 0755
         owner: "{{ slave_linux_jenkins_username }}"
+      when: ansible_ssh_host == jenkins_primary_ip
 
     - name: install detc
       shell: 'curl https://detc-artifacts.s3.amazonaws.com/install.sh | bash'
+      when: ansible_ssh_host == jenkins_primary_ip
 
     - name: add jenkins server pub key to authorized keys
       lineinfile:
@@ -70,3 +74,4 @@
         line: "{{ jenkins_server_pub_key }}"
         insertbefore: BOF
       become: false
+      when: ansible_ssh_host == jenkins_primary_ip
