@@ -9,6 +9,9 @@ VoteAppAKS:
       prompt: true
     - path: lacework.deploy_agent
       default: true
+    - path: lacework.api_url
+      description: lacework API url
+      default: https://api.lacework.net
   needs:
     - azure-k8s
   steps:
@@ -130,6 +133,7 @@ VoteAppAKS:
         extra_vars:
           lacework_deploy_agent: !secret lacework.deploy_agent
           lacework_access_token: !secret lacework.access_token
+          lacework_api_server: !secret lacework.api_url
           windows_password: !secret windows.password
           windows_username: !secret windows.username
           db_pod_ip: !lookup /voteapp/outputs/voteapp-db

@@ -28,6 +28,9 @@ jenkins:
     - path: rds.password
     - path: lacework.deploy_agent
       default: true
+    - path: lacework.api_url
+      description: lacework API url
+      default: https://api.lacework.net
   steps:
     - name: generate-ssh-key-pair
       extension: Ansible
@@ -276,6 +279,8 @@ jenkins:
         extra_vars:
           lacework_deploy_agent: !secret lacework.deploy_agent
           lacework_access_token: !secret lacework.access_token
+          lacework_api_server: !secret lacework.api_url
+
           lacework_account_name: !secret lacework.account_name
           lacework_scanner_token: !secret lacework.scanner_token
           jenkins_admin_id: !secret jenkins.admin_id
@@ -381,6 +386,7 @@ jenkins:
 
           lacework_deploy_agent: !secret lacework.deploy_agent
           lacework_access_token: !secret lacework.access_token
+          lacework_api_server: !secret lacework.api_url
 
           aws_access_key: !lookupSecret /jenkins-server-security-group/outputs/aws_access_key
           aws_secret_key: !lookupSecret /jenkins-server-security-group/outputs/aws_secret_key
