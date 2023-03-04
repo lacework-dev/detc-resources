@@ -27,7 +27,7 @@ module "aws_config" {
 }
 
 module "main_cloudtrail" {
-  cloudtrail_name       = "cloudtrail-${var.lacework_subaccount}"
+  cloudtrail_name       = "cloudtrail${var.lacework_account}${var.lacework_subaccount}"
   source                = "lacework/cloudtrail/aws"
   version               = "2.3.1"
   iam_role_arn          = module.aws_config.iam_role_arn
