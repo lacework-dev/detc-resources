@@ -2,7 +2,7 @@ laceworkConfig:
   serverUrl: {{ or .api_url "https://api.lacework.net" }}
   accessToken: {{ .access_token }}
   kubernetesCluster: {{ .cluster_name }}
-{{ if .enable_cluster_agent }}
+{{ if eq .enable_cluster_agent "true" }}
 clusterAgent:
   enable: True
   image:
@@ -11,10 +11,11 @@ clusterAgent:
   clusterType: {{ .cluster_type }}
   clusterRegion: {{ .region }}
 {{ end }}
-{{ if not .enable_cluster_agent }}
+{{ if ne .enable_cluster_agent "true" }}
 clusterAgent:
   enable: False
 {{ end }}
 image:
   repository: "lacework/datacollector"
   tag: {{ or .agent_tag "latest" }}
+
