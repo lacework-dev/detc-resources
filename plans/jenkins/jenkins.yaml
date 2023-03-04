@@ -233,8 +233,10 @@ jenkins:
     - name: install-jenkins-server
       extension: Ansible
       source:
-        location: "git+https://github.com/lacework-dev/detc-resources.git"
-        subdir: "apps/jenkins/ansible"
+        - location: "git+https://github.com/lacework-dev/detc-resources.git"
+          subdir: "apps/jenkins/ansible"
+        - location: "git+https://github.com/lacework-dev/detc-resources.git"
+          subdir: "util/laceworkagent/ansible"
       tags: jenkins
       needs:
         - jenkins-server-security-group
@@ -263,7 +265,7 @@ jenkins:
         playbook:
           - docker.yml
           - jenkins.yml
-          - lacework.yml
+          - agent.yaml
         galaxy:
           roles:
             - geerlingguy.java
@@ -272,8 +274,9 @@ jenkins:
           become: true
         inventory: !lookup /jenkins-server/outputs/ip
         extra_vars:
-          lacework_account_name: !secret lacework.account_name
+          lacework_deploy_agent: !secret lacework.deploy_agent
           lacework_access_token: !secret lacework.access_token
+          lacework_account_name: !secret lacework.account_name
           lacework_scanner_token: !secret lacework.scanner_token
           jenkins_admin_id: !secret jenkins.admin_id
           jenkins_admin_pass: !secret jenkins.admin_pass
