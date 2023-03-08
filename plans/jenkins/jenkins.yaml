@@ -22,6 +22,9 @@ jenkins:
     - path: lacework.scanner_token
     - path: lacework.account_name
     - path: lacework.admission_controller_token
+    - path: lacework.api_key
+    - path: lacework.api_secret
+    - path: lacework.subaccount_name
     - path: windows.username
     - path: windows.password
     - path: rds.username
@@ -387,6 +390,10 @@ jenkins:
           lacework_deploy_agent: !secret lacework.deploy_agent
           lacework_access_token: !secret lacework.access_token
           lacework_api_server: !secret lacework.api_url
+          lacework_api_key: !secret lacework.api_key
+          lacework_api_secret: !secret lacework.api_secret
+          lacework_account_name: !secret lacework.account_name
+          lacework_subaccount_name: !secret lacework.subaccount_name
 
           aws_access_key: !lookupSecret /jenkins-server-security-group/outputs/aws_access_key
           aws_secret_key: !lookupSecret /jenkins-server-security-group/outputs/aws_secret_key
