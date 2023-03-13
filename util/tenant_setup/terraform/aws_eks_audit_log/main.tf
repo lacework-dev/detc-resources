@@ -26,8 +26,9 @@ provider "aws" {
 }
 
 module "aws_eks_audit_log" {
-  source             = "lacework/eks-audit-log/aws"
-  version            = "0.4.2"
-  cloudwatch_regions = [var.cluster_region]
-  cluster_names      = [var.cluster_name]
+  source               = "lacework/eks-audit-log/aws"
+  version              = "0.4.2"
+  cloudwatch_regions   = [var.cluster_region]
+  cluster_names        = [var.cluster_name]
+  bucket_force_destroy = true
 }
