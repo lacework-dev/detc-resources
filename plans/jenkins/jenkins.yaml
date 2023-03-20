@@ -70,13 +70,17 @@ jenkins:
         username: !secret rds.username
         password: !secret rds.password
         name: "jenkinsdb"
+
     - name: jenkins-vpc
       extension: VPC.AWS
       tags: infrastructure
       args:
         name: "jenkins-vpc"
+
     - name: jenkins-server
       extension: EC2Instance
+      needs:
+        - jenkins-vpc
       tags: infra
       helpers:
         - helper: GenerateOutput
@@ -86,8 +90,6 @@ jenkins:
           args:
             dst: jenkins_url
             format: "http://{{ .ip }}:8080"
-      needs:
-        - jenkins-vpc
       args:
         vpc_id: !lookup /jenkins-vpc/outputs/vpc_id
         subnet: !lookup /jenkins-vpc/outputs/subnet_id1
@@ -95,13 +97,14 @@ jenkins:
 
     - name: jenkins-agent-primary
       extension: EC2Instance
-      tags: infra
       needs:
         - jenkins-vpc
+      tags: infra
       args:
         vpc_id: !lookup /jenkins-vpc/outputs/vpc_id
         subnet: !lookup /jenkins-vpc/outputs/subnet_id1
         instance_name: "jenkins-agent-primary"
+
     - name: add-ssh-key-to-host-primary
       extension: Ansible
       needs:
@@ -133,13 +136,14 @@ jenkins:
 
     - name: jenkins-agent-2
       extension: EC2Instance
-      tags: infra
       needs:
         - jenkins-vpc
+      tags: infra
       args:
         vpc_id: !lookup /jenkins-vpc/outputs/vpc_id
         subnet: !lookup /jenkins-vpc/outputs/subnet_id1
         instance_name: "jenkins-agent-2"
+
     - name: add-ssh-key-to-host-2
       extension: Ansible
       needs:
@@ -171,13 +175,14 @@ jenkins:
 
     - name: jenkins-agent-3
       extension: EC2Instance
-      tags: infra
       needs:
         - jenkins-vpc
+      tags: infra
       args:
         vpc_id: !lookup /jenkins-vpc/outputs/vpc_id
         subnet: !lookup /jenkins-vpc/outputs/subnet_id1
         instance_name: "jenkins-agent-3"
+
     - name: add-ssh-key-to-host-3
       extension: Ansible
       needs:
@@ -207,7 +212,6 @@ jenkins:
         playbook:
           - add.yml
 
-
     - name: jenkins-server-security-group
       extension: Terraform
       needs:
@@ -224,6 +228,7 @@ jenkins:
           vpc_id: !lookup /jenkins-vpc/outputs/vpc_id
           agent_sg_id: !lookup /jenkins-agent-primary/outputs/sg_id
           server_sg_id: !lookup /jenkins-server/outputs/sg_id
+
     - name: jenkins-service-account-gcp
       extension: Terraform
       needs:
@@ -236,17 +241,18 @@ jenkins:
           - credentials
           - email
         cloud: gcp
+
     - name: install-jenkins-server
       extension: Ansible
+      needs:
+        - jenkins-server-security-group
+        - jenkins-server
       source:
         - location: "git+https://github.com/lacework-dev/detc-resources.git"
           subdir: "apps/jenkins/ansible"
         - location: "git+https://github.com/lacework-dev/detc-resources.git"
           subdir: "util/laceworkagent/ansible"
       tags: jenkins
-      needs:
-        - jenkins-server-security-group
-        - jenkins-server
       lookup:
       helpers:
         - helper: ServiceAvailable
@@ -283,7 +289,6 @@ jenkins:
           lacework_deploy_agent: !secret lacework.deploy_agent
           lacework_access_token: !secret lacework.access_token
           lacework_api_server: !secret lacework.api_url
-
           lacework_account_name: !secret lacework.account_name
           lacework_scanner_token: !secret lacework.scanner_token
           jenkins_admin_id: !secret jenkins.admin_id
@@ -301,6 +306,7 @@ jenkins:
           agent_ssh_private_key: !lookupSecret /jenkins-agent-primary/outputs/pem
           github_username: !secret github.username
           github_pat: !secret github.pat
+
     - name: add-private-ssh-key-file-to-jeninks-server
       extension: Ansible
       needs:
@@ -331,18 +337,76 @@ jenkins:
         playbook:
           - add_file.yml
 
+    - name: disable-unattended-upgrades-jenkins-workers
+      extension: Ansible
+      needs:
+        - jenkins-agent-primary
+        - jenkins-agent-2
+        - jenkins-agent-3
+      source:
+        - location: "git+https://github.com/lacework-dev/detc-resources.git"
+          subdir: "util/host_setup/ansible"
+      helpers:
+        - helper: ServiceAvailable
+          args:
+            max_wait: 60
+            lookup_hostname: inventory
+            port: 22
+        - helper: WriteValue
+          args:
+            raw_value: !lookup /generate-ssh-key-pair/outputs/private_key
+            dstfile: instance.pem
+            mode: 0600
+      args:
+        private_key: instance.pem
+        user: "ubuntu"
+        playbook: disable-unattended-upgrades.yml
+        privilege_escalation:
+          become: true
+        inventory:
+          - !lookup /jenkins-agent-primary/outputs/ip
+          - !lookup /jenkins-agent-2/outputs/ip
+          - !lookup /jenkins-agent-3/outputs/ip
+
+    - name: disable-unattended-upgrades-jenkins-server
+      extension: Ansible
+      needs:
+        - jenkins-server
+      source:
+        - location: "git+https://github.com/lacework-dev/detc-resources.git"
+          subdir: "util/host_setup/ansible"
+      helpers:
+        - helper: ServiceAvailable
+          args:
+            max_wait: 60
+            lookup_hostname: inventory
+            port: 22
+        - helper: WriteValue
+          args:
+            raw_value: !lookup /jenkins-server/outputs/pem
+            dstfile: instance.pem
+            mode: 0600
+      args:
+        private_key: instance.pem
+        user: "ubuntu"
+        playbook: disable-unattended-upgrades.yml
+        privilege_escalation:
+          become: true
+        inventory:
+          - !lookup /jenkins-server/outputs/ip
+
     - name: install-jenkins-agent
       extension: Ansible
+      needs:
+        - jenkins-server-security-group
+        - install-jenkins-server
+        - jenkins-service-account-gcp
       source:
         - location: "git+https://github.com/lacework-dev/detc-resources.git"
           subdir: "apps/jenkins/ansible"
         - location: "git+https://github.com/lacework-dev/detc-resources.git"
           subdir: "util/laceworkagent/ansible"
       tags: jenkins
-      needs:
-        - jenkins-server-security-group
-        - install-jenkins-server
-        - jenkins-service-account-gcp
       lookup:
       helpers:
         - helper: ServiceAvailable
@@ -386,7 +450,6 @@ jenkins:
           slave_linux_user_group: ubuntu
           slave_linux_jenkins_public_key: !lookupSecret /jenkins-agent-primary/outputs/public_key
           lacework_admission_controller_token: !secret lacework.admission_controller_token
-
           lacework_deploy_agent: !secret lacework.deploy_agent
           lacework_access_token: !secret lacework.access_token
           lacework_api_server: !secret lacework.api_url
@@ -394,30 +457,23 @@ jenkins:
           lacework_api_secret: !secret lacework.api_secret
           lacework_account_name: !secret lacework.account_name
           lacework_subaccount_name: !secret lacework.subaccount_name
-
           aws_access_key: !lookupSecret /jenkins-server-security-group/outputs/aws_access_key
           aws_secret_key: !lookupSecret /jenkins-server-security-group/outputs/aws_secret_key
           aws_region: !secret aws.region
-
           gcp_service_account_email: !lookupSecret /jenkins-service-account-gcp/outputs/email
           gcp_service_account_file_content: !lookupSecret /jenkins-service-account-gcp/outputs/credentials
           gcp_region: !secret gcp.region
           gcp_project_id: !secret gcp.project_id
-
           azure_region: !secret azure.region
           azure_app_id: !secret azure.app_id
           azure_password: !secret azure.password
           azure_tenant_id: !secret azure.tenant_id
           azure_subscription_id: !secret azure.subscription_id
-
           dockerhub_password: !secret dockerhub.password
           dockerhub_user: !secret dockerhub.user
-
           windows_username: !secret windows.username
           windows_password: !secret windows.password
-
           jenkins_server_pub_key: !lookup /install-jenkins-server/outputs/jenkins_public_key
-
           rds_address: !lookup /jenkins-rds/outputs/address
           rds_port: !lookup /jenkins-rds/outputs/port
           rds_usernamme: !secret rds.username

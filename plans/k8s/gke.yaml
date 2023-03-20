@@ -29,7 +29,7 @@ gcp-k8s:
     - name: lacework-agent-legacy
       extension: Kubectl
       description: (Legacy) This step deploys Lacework instrumentation to an existing K8s cluster
-      condition: 
+      condition:
         - !secret lacework.k8s_use_kubectl_agent == true
         - !secret lacework.deploy_agent == true
       tags: monitoring
@@ -51,6 +51,29 @@ gcp-k8s:
         kubectl_config_file: kubectl
         kube_manifest_path: "."
         cluster_name: sharedgke
+
+    - name: disable-unattended-updates
+      extension: Kubectl
+      description: This step disables unattended updates on the nodes of the k8 cluster
+      tags: util
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "util/k8-daemonset"
+        templates:
+          - "run-command-on-node.yml"
+      needs:
+        - k8s
+      helpers:
+        - helper: WriteValue
+          run_on_dryrun: true
+          args:
+            raw_value: !lookup /k8s/outputs/kubectl_config
+            dstfile: kubectl
+      args:
+        command: "sudo systemctl stop update-engine; sudo systemctl mask update-engine"
+        kubectl_config_file: kubectl
+        kube_manifest_path: "."
+        cluster_name: sharedaks
 
     - name: lacework-agent
       extension: Helm

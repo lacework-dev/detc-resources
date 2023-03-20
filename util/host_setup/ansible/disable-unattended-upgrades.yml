@@ -1,0 +1,9 @@
+---
+- name: disable unattended-upgrades
+  hosts: all
+  gather_facts: False
+  tasks:
+    - name: remove packages
+      ansible.builtin.command: apt-get purge -y unattended-upgrades
+    - name: kill unattended-upgrade-shutdown
+      ansible.builtin.command: killall unattended-upgrade-shutdown
