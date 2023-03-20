@@ -1,0 +1,106 @@
+---
+sizing:
+  steps:
+    - name: aws
+      extension: Ansible
+      source:
+        - location: "git+https://github.com/lacework-dev/detc-resources.git"
+          subdir: "util/sizing/ansible"
+      args:
+        playbook: sizing_aws.yml
+        inventory: localhost
+      helpers:
+        - helper: FileToKv
+          lifecycle: [afterCreate]
+          args:
+            name: output
+            srcfile: output
+
+    - name: old-aws
+      extension: Ansible
+      source:
+        - location: "git+https://github.com/lacework-dev/detc-resources.git"
+          subdir: "util/sizing/ansible"
+      args:
+        playbook: old_sizing_aws.yml
+        inventory: localhost
+      helpers:
+        - helper: FileToKv
+          lifecycle: [afterCreate]
+          args:
+            name: output
+            srcfile: output
+
+
+    - name: gcp
+      extension: Ansible
+      source:
+        - location: "git+https://github.com/lacework-dev/detc-resources.git"
+          subdir: "util/sizing/ansible"
+      args:
+        playbook: sizing_gcp.yml
+        inventory: localhost
+        extra_vars:
+          project_id: !secret gcp.project_id
+      helpers:
+        - helper: FileToKv
+          lifecycle: [afterCreate]
+          args:
+            name: output
+            srcfile: output
+
+    - name: old-gcp
+      extension: Ansible
+      source:
+        - location: "git+https://github.com/lacework-dev/detc-resources.git"
+          subdir: "util/sizing/ansible"
+      args:
+        playbook: old_sizing_gcp.yml
+        inventory: localhost
+        extra_vars:
+          project_id: !secret gcp.project_id
+      helpers:
+        - helper: FileToKv
+          lifecycle: [afterCreate]
+          args:
+            name: output
+            srcfile: output
+
+    - name: azure
+      extension: Ansible
+      source:
+        - location: "git+https://github.com/lacework-dev/detc-resources.git"
+          subdir: "util/sizing/ansible"
+      args:
+        playbook: sizing_azure.yml
+        inventory: localhost
+        extra_vars:
+          app_id: !secret azure.app_id
+          password: !secret azure.password
+          tenant_id: !secret azure.tenant_id
+          subscription_id: !secret azure.subscription_id
+      helpers:
+        - helper: FileToKv
+          lifecycle: [afterCreate]
+          args:
+            name: output
+            srcfile: output
+
+    - name: old-azure
+      extension: Ansible
+      source:
+        - location: "git+https://github.com/lacework-dev/detc-resources.git"
+          subdir: "util/sizing/ansible"
+      args:
+        playbook: old_sizing_azure.yml
+        inventory: localhost
+        extra_vars:
+          app_id: !secret azure.app_id
+          password: !secret azure.password
+          tenant_id: !secret azure.tenant_id
+      helpers:
+        - helper: FileToKv
+          lifecycle: [afterCreate]
+          args:
+            name: output
+            srcfile: output
