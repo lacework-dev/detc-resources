@@ -1,0 +1,21 @@
+---
+- name: AWS Sizing Script
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Download aws sizing
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/lacework-dev/scripts/main/bash/lw_aws_inventory.sh
+        dest: ./lw_aws_inventory.sh
+    - name: run aws sizing
+      ansible.builtin.command:
+        argv:
+          - bash
+          - ./lw_aws_inventory.sh
+      register: aws_sizing
+      ignore_errors: true
+    - name: write ouput to file
+      ansible.builtin.copy:
+        content: "{{ aws_sizing.stdout }}"
+        dest: "output"

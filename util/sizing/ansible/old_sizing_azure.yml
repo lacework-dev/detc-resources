@@ -1,0 +1,41 @@
+---
+- name: Enable all Lacework Policies
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Download old azure sizing
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/lacework-dev/scripts/main/bash/old-resource-scripts/lw_azure_inventory.sh
+        dest: ./old_lw_azure_inventory.sh
+    - name: log into azure
+      ansible.builtin.command:
+        argv:
+          - az
+          - login
+          - --service-principal
+          - -u
+          - "{{ app_id }}"
+          - -p
+          - "{{ password }}"
+          - -t
+          - "{{ tenant_id }}"
+    - name: Add azure resource-graph
+      ansible.builtin.command:
+        argv:
+          - az
+          - extension
+          - add
+          - --name
+          - resource-graph
+    - name: Run old azure sizing
+      ansible.builtin.command:
+        argv:
+          - bash
+          - ./old_lw_azure_inventory.sh
+      register: azure_sizing
+      ignore_errors: true
+    - name: Write old output to file
+      ansible.builtin.copy:
+        content: "{{ azure_sizing.stdout }}"
+        dest: "output"

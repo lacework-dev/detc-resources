@@ -1,0 +1,23 @@
+---
+- name: GCP Sizing Script
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Download gcp sizing
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/lacework-dev/scripts/main/bash/lw_gcp_inventory.sh
+        dest: ./lw_gcp_inventory.sh
+    - name: run gcp sizing
+      ansible.builtin.command:
+        argv:
+          - bash
+          - ./lw_gcp_inventory.sh
+          - -p
+          - "{{ project_id }}"
+      register: gcp_sizing
+      ignore_errors: true
+    - name: write ouput to file
+      ansible.builtin.copy:
+        content: "{{ gcp_sizing.stdout }}"
+        dest: "output"
