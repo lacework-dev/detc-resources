@@ -38,6 +38,13 @@ module "gke" {
   ip_range_services = "${var.project}-ip-range-services-name"
 
   skip_provisioners = true
+
+  node_pools = [
+    {
+      name: "default-node-pool"
+      auto_upgrade: false
+    }
+  ]
 }
 
 module "vpc" {
