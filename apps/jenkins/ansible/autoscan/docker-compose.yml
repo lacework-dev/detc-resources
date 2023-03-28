@@ -2,7 +2,7 @@ version: "3.9"
     
 services:
   autoscanner:
-    image: alannix/container-auto-scan-inline:latest
+    image: lacework/container-auto-scan-inline:latest
     restart: always
     command: 
       - -d
