@@ -1,0 +1,41 @@
+- hosts: all
+  tasks:
+  - name: Update apt packages
+    apt:
+      update_cache: "yes"
+      force_apt_get: "yes"
+    become: true
+
+  - name: Install packages needed
+    apt:
+      name: "awscli"
+      state: present
+    become: true
+
+  - name: Creates directory aws config dir
+    file:
+      path: /home/ubuntu/.aws/
+      state: directory
+
+  - name: Create aws credentials file
+    ansible.builtin.template:
+      src: credentials
+      dest: /home/ubuntu/.aws/credentials
+      force: true
+
+  - name: Creates directory for aws run script
+    file:
+      path: /usr/share/aws
+      state: directory
+
+  - name: write script
+    template:
+      src: run.sh
+      dest: "/usr/share/aws/run.sh"
+      mode: 0755
+
+  - name: run the run.sh script
+    ansible.builtin.cron:
+      name: "activity-generator"
+      minute: "*/5"
+      job: "/usr/share/aws/run.sh"

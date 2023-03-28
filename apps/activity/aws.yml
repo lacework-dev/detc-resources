@@ -1,0 +1,60 @@
+---
+activity-aws:
+  steps:
+    - name: activity
+      extension: Terraform
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "apps/activity/terraform/aws"
+      args:
+        cloud: aws
+        user_name: cloudactivity
+        outputs:
+          - secret_key
+          - access_key
+    - name: activity-generator-vpc
+      extension: VPC.AWS
+      tags: infrastructure
+      args:
+        name: "activity-generator-vpc"
+    - name: activity-generator
+      extension: EC2Instance
+      needs:
+        - activity-generator-vpc
+      args:
+        ports: "22"
+        vpc_id: !lookup /activity-generator-vpc/outputs/vpc_id
+        subnet: !lookup /activity-generator-vpc/outputs/subnet_id1
+        instance_name: "cloud-activity"
+
+    - name: setup-activity-generation
+      extension: Ansible
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "apps/activity/ansible/aws"
+      needs:
+        - activity-generator
+      helpers:
+        - helper: ServiceAvailable
+          args:
+            max_wait: 60 # seconds
+            hostname: !lookup /activity-generator/outputs/ip
+            port: 22
+        - helper: WriteValue
+          run_on_dryrun: true
+          args:
+            raw_value: !lookupSecret /activity-generator/outputs/pem
+            dstfile: instance.pem
+            mode: 0600
+      args:
+        user: "ubuntu"
+        private_key: instance.pem
+        inventory: !lookup /activity-generator/outputs/ip
+        playbook: setup.yml
+        privilege_escalation:
+          become: true
+        extra_vars:
+          ansible_user: ubuntu
+          access_key: !lookupSecret /activity/outputs/access_key
+          secret_key: !lookupSecret /activity/outputs/secret_key
+          region: !secret aws.region
