@@ -7,3 +7,4 @@
       ansible.builtin.command: apt-get purge -y unattended-upgrades
     - name: kill unattended-upgrade-shutdown
       ansible.builtin.command: killall unattended-upgrade-shutdown
+      ignore_errors: yes
