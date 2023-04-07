@@ -28,6 +28,11 @@ api_secret = "{{ lacework_api_secret }}"
 account_name = "{{ lacework_account_name }}"
 subaccount_name = "{{ lacework_subaccount_name }}"
 
+[admission]
+ca_bundle = "{{ admission_ca_bundle }}"
+server_certificate = "{{ admission_server_certificate }}"
+server_key = "{{ admission_server_key }}"
+
 [dockerhub]
 user = "{{ dockerhub_user }}"
 password = "{{ dockerhub_password }}"
