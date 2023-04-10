@@ -306,6 +306,7 @@ jenkins:
           agent_ssh_private_key: !lookupSecret /jenkins-agent-primary/outputs/pem
           github_username: !secret github.username
           github_pat: !secret github.pat
+          jenkins_deb_repo_key: https://pkg.jenkins.io/debian/jenkins.io-2023.key
 
     - name: add-private-ssh-key-file-to-jeninks-server
       extension: Ansible
@@ -478,3 +479,4 @@ jenkins:
           rds_port: !lookup /jenkins-rds/outputs/port
           rds_usernamme: !secret rds.username
           rds_password: !secret rds.password
+          jenkins_deb_repo_key: https://pkg.jenkins.io/debian/jenkins.io-2023.key
