@@ -458,6 +458,9 @@ jenkins:
           lacework_api_secret: !secret lacework.api_secret
           lacework_account_name: !secret lacework.account_name
           lacework_subaccount_name: !secret lacework.subaccount_name
+          admission_ca_bundle: !secret admission.ca_bundle
+          admission_server_certificate: !secret admission.server_certificate
+          admission_server_key: !secret admission.server_key
           aws_access_key: !lookupSecret /jenkins-server-security-group/outputs/aws_access_key
           aws_secret_key: !lookupSecret /jenkins-server-security-group/outputs/aws_secret_key
           aws_region: !secret aws.region
