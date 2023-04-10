@@ -37,5 +37,6 @@
   - name: run the run.sh script
     ansible.builtin.cron:
       name: "activity-generator"
+      user: ubuntu
       minute: "*/5"
       job: "/usr/share/aws/run.sh"
