@@ -1,0 +1,3 @@
+# Post-Deployment of demo environment
+#  TO BE RUN AFTER: Jenkins jobs to deploy infrastructure are completed
+- https://raw.githubusercontent.com/lacework-dev/detc-resources/main/plans/util/post_deployment_setup.yaml
