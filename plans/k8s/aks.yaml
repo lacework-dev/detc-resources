@@ -81,12 +81,18 @@ azure-k8s:
         - !secret lacework.k8s_use_kubectl_agent != true
         - !secret lacework.deploy_agent == true
       source:
-        location: https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/lacework-agent-helm/values.yaml
-        templates:
-          - values.yaml
+        - location: git+https://github.com/lacework/helm-charts.git
+        - location: https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/lacework-agent-helm/values.yaml
+          templates:
+            - values.yaml
+        - https://raw.githubusercontent.com/lacework-dev/detc-resources/main/util/laceworkagent/ansible/templates/syscall.j2
       needs:
         - k8s
       helpers:
+        - helper: RunCommand
+          args:
+            commands:
+              - ["mv", "syscall.j2", "lacework-agent/config/syscall_config.yaml"]
         - helper: WriteValue
           run_on_dryrun: true
           args:
@@ -99,7 +105,7 @@ azure-k8s:
             url: https://lacework.github.io/helm-charts
         name: lacework-agent
         namespace: lacework
-        chart: lacework/lacework-agent
+        chart: "lacework-agent/"
         region: !secret aws.region
         value_files:
           - values.yaml
