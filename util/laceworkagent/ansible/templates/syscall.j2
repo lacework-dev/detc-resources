@@ -31,3 +31,31 @@ etype.file:
         watchsshconfig:
             watchpath: /etc/ssh/sshd_config
             watchfor: create, modify
+etype.exec:
+    send-if-matches:
+        send-all-sudo:
+            exepath.endswith: sudo
+        send-all-apk:
+            exepath.endswith: apk
+        send-all-apt:
+            exepath.endswith: apt
+        send-all-apt-get:
+            exepath.endswith: apt-get
+        send-all-curl:
+            exepath.endswith: curl
+        send-all-wget:
+            exepath.endswith: wget
+        send-all-echo:
+            exepath.endswith: echo
+        send-all-cat:
+            exepath.endswith: cat
+        send-all-strace:
+            exepath.endswith: strace
+        send-all-chmod:
+            exepath.endswith: chmod
+        send-all-scp:
+            exepath.endswith: scp
+        send-all-export:
+            exepath.endswith: export
+        send-all-ln:
+            exepath.endswith: ln

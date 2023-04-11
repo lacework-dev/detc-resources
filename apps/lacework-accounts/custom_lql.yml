@@ -40,3 +40,15 @@
               lacework_apikey: !secret lacework.api_key
               lacework_apisecret: !secret lacework.api_secret
               port: 5986
+        - name: syscall-custom-lql
+          extension: Terraform
+          source:
+            location: "git+https://github.com/lacework-dev/detc-resources.git"
+            subdir: "apps/lacework-accounts/syscalls/lql"
+          args:
+            cloud: azure
+            tfvars:
+              lacework_account: !secret lacework.account_name
+              lacework_subaccount: !secret lacework.subaccount_name
+              lacework_apikey: !secret lacework.api_key
+              lacework_apisecret: !secret lacework.api_secret
