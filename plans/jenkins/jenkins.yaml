@@ -270,7 +270,7 @@ jenkins:
           lifecycle: [afterCreate]
           args:
             name: jenkins_public_key
-            srcfile: public_key
+            srcfile: instance.pem
       args:
         private_key: instance.pem
         user: "ubuntu"
@@ -295,6 +295,8 @@ jenkins:
           jenkins_admin_pass: !secret jenkins.admin_pass
           jenkins_ro_id: !secret jenkins.ro_id
           jenkins_ro_pass: !secret jenkins.ro_pass
+          jenkins2_cli_username: !secret jenkins.admin_id
+          jenkins2_cli_password: !secret jenkins.admin_pass
           dockerhub_access_token: !secret dockerhub.token
           dockerhub_access_user: !secret dockerhub.user
           source_private_key: !lookupSecret /jenkins-server/outputs/pem

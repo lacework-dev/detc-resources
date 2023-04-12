@@ -86,7 +86,6 @@ resource "azurerm_kubernetes_cluster" "default" {
   resource_group_name                 = azurerm_resource_group.default.name
   dns_prefix                          = "${local.cluster_name}-k8s"
   private_cluster_public_fqdn_enabled = true
-  automatic_channel_upgrade  = "none"
 
   default_node_pool {
     name            = "default"
