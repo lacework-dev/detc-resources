@@ -23,18 +23,21 @@ provider "google" {
 }
 
 resource "google_project_service" "enable-compute" {
-  project = var.project
-  service = "compute.googleapis.com"
+  project            = var.project
+  service            = "compute.googleapis.com"
+  disable_on_destroy = false
 }
 
 resource "google_project_service" "enable-k8s" {
-  project = var.project
-  service = "container.googleapis.com"
+  project            = var.project
+  service            = "container.googleapis.com"
+  disable_on_destroy = false
 }
 
 resource "google_project_service" "enable-cloudresourcemanager" {
-  project = var.project
-  service = "cloudresourcemanager.googleapis.com"
+  project            = var.project
+  service            = "cloudresourcemanager.googleapis.com"
+  disable_on_destroy = false
 }
 
 resource "google_service_account" "service_account" {
