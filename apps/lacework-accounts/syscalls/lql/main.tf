@@ -51,7 +51,7 @@ resource "lacework_query" "LW_Custom_BashCommands" {
 EOT
 }
 
-resource "lacework_policy" "LW_OPEN_PORT_POLICY" {
+resource "lacework_policy" "LW_Custom_Bash_Command_Policy" {
   title       = "Bash Command Run on Host"
   description = "Alert contains details on a bash command caught by Lacework agent syscall detections."
   remediation = "Collect this and similair alerts for investigation and retro session"
