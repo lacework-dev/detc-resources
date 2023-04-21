@@ -32,3 +32,11 @@
           - "{{ item.policyId }}"
       loop: "{{ policy_ids }}"
       when: item.enabled == false
+
+    - name: Disable Default Reverse Shell Policy
+      ansible.builtin.command:
+        argv:
+          - lacework
+          - policy
+          - disable
+          - lacework-global-646
