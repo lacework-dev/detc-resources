@@ -3,7 +3,7 @@
     deploy_agent: "{{ lacework_deploy_agent | default('true') }}"
     access_token: "{{ lacework_access_token }}"
     enable_caa: "{{ lacework_enable_caa | default(true) }}"
-    syscall_template: "{{ lacework_syscall_template | default(undefined) }}"
+    syscall_template: "{{ lacework_syscall_template | default('syscall.j2') }}"
     api_server: "{{ lacework_api_server | default('https://api.lacework.net/')}}"
     agent_version: "{{ lacework_agent_version | default('latest') }}"
     msi_url: "{{ lacework_msi_url | default(false) }}"
