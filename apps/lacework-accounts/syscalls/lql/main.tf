@@ -59,7 +59,7 @@ resource "lacework_policy" "LW_Custom_Bash_Command_Policy" {
   severity    = "High"
   type        = "Violation"
   evaluation  = "Hourly"
-  enabled     = true
+  enabled     = false
 
   alerting {
     enabled = true
