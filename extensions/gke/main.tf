@@ -36,13 +36,14 @@ module "gke" {
   subnetwork        = module.vpc.subnets_names[0]
   ip_range_pods     = "${var.project}-ip-range-pods-name"
   ip_range_services = "${var.project}-ip-range-services-name"
+  release_channel   = "UNSPECIFIED"
 
   skip_provisioners = true
 
   node_pools = [
     {
-      name: "default-node-pool"
-    #  auto_upgrade: false
+      name : "default-node-pool"
+      auto_upgrade : false
     }
   ]
 }
