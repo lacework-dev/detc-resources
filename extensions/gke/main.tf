@@ -42,7 +42,7 @@ module "gke" {
   node_pools = [
     {
       name: "default-node-pool"
-      auto_upgrade: false
+    #  auto_upgrade: false
     }
   ]
 }
