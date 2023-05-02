@@ -1,0 +1,104 @@
+---
+aws-k8s-worker:
+  required_secrets:
+    - path: lacework.access_token
+      description: lacework agent token
+    - path: lacework.api_url
+      description: lacework API url
+      default: https://api.lacework.net
+    - path: lacework.k8s_use_kubectl_agent
+      description: use legacy kubectl agent install instead of helm
+      default: false
+    - path: eks.enable_cluster_agent
+      description: enable collection agent
+      default: true
+    - path: lacework.deploy_agent
+      description: deploy lacework agent
+      default: true
+  steps:
+    - name: k8s
+      extension: EKS
+      description: This step uses the EKS extension (Terraform under the hood) to deploy the actual cluster. Expect runtimes in excess of 10 minutes
+      args:
+        region: !secret aws.region
+        cluster_name: workereks
+      helpers:
+        - helper: EKSKubectl
+          lifecycle: [ afterCreate ]
+
+    - name: lacework-agent
+      extension: Helm
+      condition:
+        - !secret lacework.k8s_use_kubectl_agent != true
+        - !secret lacework.deploy_agent == true
+      source:
+        location: https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/lacework-agent-helm/values.yaml
+        templates:
+          - values.yaml
+      needs:
+        - k8s
+      helpers:
+        - helper: WriteValue
+          run_on_dryrun: true
+          args:
+            raw_value: !lookup /aws-k8s-worker/k8s/outputs/kubectl_config
+            dstfile: kube.conf
+      args:
+        kubectl_config_file: kube.conf
+        repos:
+          - name: lacework
+            url: https://lacework.github.io/helm-charts
+        name: lacework-agent
+        namespace: lacework
+        chart: lacework/lacework-agent
+        value_files:
+          - values.yaml
+        cluster_type: eks
+        cluster_name: !lookup /aws-k8s-worker/k8s/outputs/cluster_name
+        access_token: !secret lacework.access_token
+        region: !secret aws.region
+        enable_cluster_agent: !secret eks.enable_cluster_agent
+        api_url: !secret lacework.api_url
+        # cluster_agent_tag
+        # agent_tag (datacollector)
+
+    - name: ecomm-worker
+      extension: Kubectl
+      description: This step deploys ecomm worker to an existing K8s cluster
+      tags: application
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "apps/ecomm-worker"
+        templates:
+          - "worker.yaml"
+      needs:
+        - k8s
+        - ecomm-worker-rds
+      helpers:
+        - helper: WriteValue
+          run_on_dryrun: true
+          args:
+            raw_value: !lookup /aws-k8s-worker/k8s/outputs/kubectl_config
+            dstfile: kubectl
+      args:
+        kubectl_config_file: kubectl
+        kube_manifest_path: "."
+        cluster_name: workereks
+        database_username: !secret rds.username
+        database_password: !secret rds.password
+        database_url: !lookup /aws-k8s-worker/ecomm-worker-rds/outputs/address
+        database_port: !lookup /aws-k8s-worker/ecomm-worker-rds/outputs/port
+        database_name: postgres
+
+    - name: ecomm-worker-rds
+      extension: RDS
+      needs:
+        - k8s
+      tags: infrastructure
+      args:
+        vpc_id: !lookup /aws-k8s-worker/k8s/outputs/vpc_id
+        subnet1: !lookup /aws-k8s-worker/k8s/outputs/private_subnet_id,0
+        subnet2: !lookup /aws-k8s-worker/k8s/outputs/private_subnet_id,1
+        username: !secret rds.username
+        password: !secret rds.password
+        name: "ecomm-worker-rds"
