@@ -11,6 +11,8 @@ aws-eks-audit-log-worker:
       prompt: false
     - path: lacework.api_secret
       prompt: false
+  needs:
+    - aws-k8s-worker
   steps:
     - name: aws-eks-audit-log
       extension: Terraform

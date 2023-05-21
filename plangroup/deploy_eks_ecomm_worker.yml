@@ -1,0 +1,4 @@
+# Setup EKS and Ecomm worker for K8s attack path
+- https://raw.githubusercontent.com/lacework-dev/detc-resources/main/plans/k8s/eks-worker.yaml
+- https://raw.githubusercontent.com/lacework-dev/detc-resources/main/plans/util/aws_eks_audit_log_worker.yml
+- https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/lacework-admission-controller/eks-admission-controller-worker.yml
