@@ -16,7 +16,7 @@ aws ssm list-tags-for-resource || true
 aws ssm list-command-invocations || true
 aws iam list-attached-group-policies --group-name Production || true
 
-regions=("us-east-1" "us-east-1" "us-west-2" "ap-south-1" "eu-west-2" "me-central-1")
+regions=("us-east-1" "us-east-2" "us-west-2" "ap-south-1" "eu-west-2" "eu-north-1")
 rand=$[$RANDOM % ${#regions[@]}]
 region=${regions[rand]}
 echo "region $rand ${region}"
