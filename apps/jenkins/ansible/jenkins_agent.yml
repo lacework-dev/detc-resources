@@ -5,10 +5,10 @@
       apt_repository: repo='ppa:openjdk-r/ppa'
 
     - name: add gcloud repo
-      shell: echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" |  tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+      shell: echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
 
     - name: add gcloud gpg
-      shell: curl https://packages.cloud.google.com/apt/doc/apt-key.gpg |  tee /usr/share/keyrings/cloud.google.gpg
+      shell: curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
 
     - name: Update repositories cache and install gcloud packages
       ansible.builtin.apt:
