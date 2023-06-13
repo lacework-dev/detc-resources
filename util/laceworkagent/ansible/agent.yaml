@@ -4,7 +4,7 @@
     access_token: "{{ lacework_access_token }}"
     enable_caa: "{{ lacework_enable_caa | default(true) }}"
     syscall_template: "{{ lacework_syscall_template | default('syscall.j2') }}"
-    api_server: "{{ lacework_api_server | default('https://api.lacework.net/')}}"
+    api_server: "{{ lacework_api_server | default('https://agent.lacework.net/')}}"
     agent_version: "{{ lacework_agent_version | default('latest') }}"
     msi_url: "{{ lacework_msi_url | default(false) }}"
     msi_final_url: "{% if msi_url %}{{ msi_url }}{% elif agent_version != 'latest' %}https://updates.lacework.net/{{ agent_version }}/LWDataCollector.msi{% else %}https://updates.lacework.net/windows/latest/LWDataCollector.msi{% endif %}"

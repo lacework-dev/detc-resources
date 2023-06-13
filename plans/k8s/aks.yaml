@@ -5,7 +5,7 @@ azure-k8s:
       description: lacework agent token
     - path: lacework.api_url
       description: lacework API url
-      default: https://api.lacework.net
+      default: https://agent.lacework.net
     - path: lacework.k8s_use_kubectl_agent
       description: use legacy kubectl agent install instead of helm
       default: false

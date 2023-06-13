@@ -1,5 +1,5 @@
 laceworkConfig:
-  serverUrl: {{ or .api_url "https://api.lacework.net" }}
+  serverUrl: {{ or .api_url "https://agent.lacework.net" }}
   accessToken: {{ .access_token }}
   kubernetesCluster: {{ .cluster_name }}
 {{ if eq .enable_cluster_agent "true" }}
