@@ -27,7 +27,7 @@ locals {
   engine_details = {
     "postgres" = {
       "engine"                 = "postgres"
-      "engine_version"         = 14.1
+      "engine_version"         = 14.8
       "port"                   = 5432
       "parameter_group_family" = "postgres14"
     }
