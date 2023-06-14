@@ -33,7 +33,7 @@ jenkins:
       default: true
     - path: lacework.api_url
       description: lacework API url
-      default: https://api.lacework.net
+      default: https://agent.lacework.net
   steps:
     - name: generate-ssh-key-pair
       extension: Ansible

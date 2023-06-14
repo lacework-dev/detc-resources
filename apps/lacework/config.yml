@@ -9,5 +9,5 @@ data:
       "autoupgrade": "disable",
       "tokens": {"AccessToken":"{{ index . "lw_access_token" }}"},
       "tags":{"Env":"k8s","KubernetesCluster":"{{.cluster_name}}"},
-      "serverurl":{{if .fra}}"https://api.fra.lacework.net"{{else}}"https://api.lacework.net"{{end}}
+      "serverurl":{{if .fra}}"https://agent.euprodn.lacework.net"{{else}}"https://agent.lacework.net"{{end}}
     }
