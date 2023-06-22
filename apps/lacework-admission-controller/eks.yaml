@@ -35,7 +35,7 @@ eks-admission-controller:
       name: lacework-admission-controller
       namespace: lacework
       chart: lacework/admission-controller
-      account_name: !secret lacework.account_name
+      account_name: !secret lacework.account_name,@splitdots:0
       admission_controller_token: !secret lacework.admission_controller_token
       kubectl_config_file: kube.conf
       set_args:
