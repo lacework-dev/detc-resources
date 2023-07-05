@@ -8,6 +8,7 @@ variable "instance_type" { default = "t2.medium" }
 variable "public_ip" { default = true }
 variable "root_vol_size" { default = 40 }
 variable "tags" { default = "" }
+variable "ami_type" { default = "ubuntu" }
 
 resource "tls_private_key" "keypair" {
   algorithm = "RSA"
@@ -18,12 +19,30 @@ resource "aws_key_pair" "server-key" {
   public_key = tls_private_key.keypair.public_key_openssh
 }
 
+locals {
+  ami_data = {
+    "ubuntu" : {
+      "username" : "ubuntu"
+      "name_filter" : ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+      "owners" : ["099720109477"] # Canonical
+    }
+    "amazonlinux" : {
+      "username" : "ec2-user"
+      "name_filter" : ["amzn2-ami-hvm*"]
+      "owners" : ["amazon"]
+    }
+  }
+  split_ports   = split(",", var.ports)
+  split_sg_arns = split(",", var.security_group_arns)
+  new_tags      = split(",", var.tags)
+}
+
 data "aws_ami" "ubuntu" {
   most_recent = true
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+    values = local.ami_data[var.ami_type]["name_filter"]
   }
 
   filter {
@@ -31,14 +50,9 @@ data "aws_ami" "ubuntu" {
     values = ["hvm"]
   }
 
-  owners = ["099720109477"] # Canonical
+  owners = local.ami_data[var.ami_type]["owners"]
 }
 
-locals {
-  split_ports   = split(",", var.ports)
-  split_sg_arns = split(",", var.security_group_arns)
-  new_tags      = split(",", var.tags)
-}
 
 resource "aws_security_group" "ingress-from-all" {
   name   = "${var.instance_name}-ingress-sg"
@@ -80,6 +94,10 @@ resource "aws_instance" "instance-server" {
 
   key_name   = "${var.instance_name}-server-key"
   depends_on = [aws_key_pair.server-key, aws_security_group.ingress-from-all]
+}
+
+output "username" {
+  value = local.ami_data[var.ami_type]["username"]
 }
 
 output "ip" {

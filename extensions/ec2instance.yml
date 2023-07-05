@@ -31,6 +31,9 @@ args:     # These automatically get passed through to the underlying ext as args
   tags: ### key=value,key=value,...
     type: string
     required: false
+  ami_type: ### ubuntu, amazonlinux
+    type: string
+    required: false
 source: # Where to get the code the underlying ext should run
   location: "git+https://github.com/lacework-dev/detc-resources.git"
   subdir: "extensions/ec2instance"
@@ -39,6 +42,7 @@ extension: # Core extension name/args to set.  These args are static vs the supp
   args:
     cloud: AWS
     outputs:
+      - username
       - ip
       - pem
       - public_key
