@@ -1,6 +1,10 @@
 - hosts: all
   vars:
+    linux: "{{ ansible_system | lower == 'linux' }}"
+    amazon_linux: "{{ linux and (ansible_distribution == 'Amazon') }}"
+    ubuntu_linux: "{{ linux and (ansible_distribution == 'Ubuntu') }}"
     deploy_agent: "{{ lacework_deploy_agent | default('true') }}"
+    do_deploy: deploy_agent == "true"
     access_token: "{{ lacework_access_token }}"
     enable_caa: "{{ lacework_enable_caa | default(true) }}"
     syscall_template: "{{ lacework_syscall_template | default('syscall.j2') }}"
@@ -12,18 +16,20 @@
   - name: Print warning that deploy is disabled
     ansible.builtin.debug:
       msg: agent deployment disabled by lacework_deploy_agent set to {{ deploy_agent }}
-    when: deploy_agent == "false"
+    when: not do_deploy
+
+    ## ubuntu
   - name: Update apt repo and cache on all Debian/Ubuntu boxes
     apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
     become: true
-    when: (ansible_system | lower == 'linux') and (deploy_agent == "true")
+    when: (do_deploy and ubuntu_linux)
   - name: add apt signing key
     apt_key:
       keyserver: hkp://keyserver.ubuntu.com:80
       id: EE0CC692
       state: present
     become: true
-    when: (ansible_system | lower == 'linux') and (deploy_agent == "true")
+    when: do_deploy and ubuntu_linux
   - name: add latest lacework repository into source list
     apt_repository:
       repo: "deb [arch=amd64] https://packages.lacework.net/latest/DEB/{{ ansible_distribution | lower  }} {{ ansible_distribution_release }} main"
@@ -31,7 +37,7 @@
       state: present
       update_cache: yes
     become: true
-    when: (ansible_system | lower == 'linux') and (deploy_agent == "true")
+    when: do_deploy and ubuntu_linux
   - name: add established lacework repository into source list
     apt_repository:
       repo: "deb [arch=amd64] https://packages.lacework.net/established/DEB/{{ ansible_distribution | lower  }} {{ ansible_distribution_release }} main"
@@ -39,7 +45,7 @@
       state: present
       update_cache: yes
     become: true
-    when: (ansible_system | lower == 'linux') and (deploy_agent == "true")
+    when: do_deploy and ubuntu_linux
   - name: add archived lacework repository into source list
     apt_repository:
       repo: "deb [arch=amd64] https://packages.lacework.net/archived/DEB/{{ ansible_distribution | lower  }} {{ ansible_distribution_release }} main"
@@ -47,31 +53,50 @@
       state: present
       update_cache: yes
     become: true
-    when: (ansible_system | lower == 'linux') and (deploy_agent == "true")
+    when: do_deploy and ubuntu_linux
   - name: install lacework datacollector
     apt:
       name: "{% if agent_version != 'latest'%}lacework={{ agent_version }}{% else %}lacework{% endif %}"
       allow_downgrade: true
       state: present
     become: true
-    when: (ansible_system | lower == 'linux') and (deploy_agent == "true")
+    when: do_deploy and ubuntu_linux
+
+    ## amazon linux
+  - name: configure the lacework repo  
+    yum_repository:  
+      name: packages-lacework-prod  
+      description: packages-lacework-prod  
+      baseurl: https://packages.lacework.net/latest/RPMS/x86_64/  
+      gpgkey: https://packages.lacework.net/latest/keys/RPM-GPG-KEY-lacework  
+      gpgcheck: yes  
+      enabled: yes  
+    when: do_deploy and amazon_linux
+
+  - name: install lacework datacollector  
+    yum:  
+      name: lacework  
+      state: latest  
+    when: do_deploy and amazon_linux
+
+    ## shared linux
   - name: wait until /var/lib/lacework/config/ is created
     wait_for:
       path: /var/lib/lacework/config/
     become: true
-    when: (ansible_system | lower == 'linux') and (deploy_agent == "true")
+    when: do_deploy and linux
   - name: write config.json
     template:
       src: config.j2
       dest: /var/lib/lacework/config/config.json
     become: true
-    when: (ansible_system | lower == 'linux') and (deploy_agent == "true")
+    when: do_deploy and linux
   - name: write syscall_config.yaml
     template:
       src: "{{ syscall_template }}"
       dest: /var/lib/lacework/config/syscall_config.yaml
     become: true
-    when: (ansible_system | lower == 'linux') and (deploy_agent == "true") and (syscall_template is defined)
+    when: do_deploy and linux and (syscall_template is defined)
 
   - name: Install Lacework Agent MSI
     ansible.windows.win_package:
@@ -79,4 +104,4 @@
       arguments:
       - ACCESSTOKEN={{ access_token }}
       - SERVERURL={{ api_server }}
-    when: (ansible_system | lower == 'win32nt') and (deploy_agent == "true")
+    when: (ansible_system | lower == 'win32nt') and do_deploy

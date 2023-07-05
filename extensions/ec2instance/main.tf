@@ -128,3 +128,11 @@ output "private_ip" {
 output "public_key" {
   value = tls_private_key.keypair.public_key_openssh
 }
+
+output "ami_type" {
+  value = var.ami_type
+}
+
+output "ami" {
+  value = data.aws_ami.ubuntu.id
+}
