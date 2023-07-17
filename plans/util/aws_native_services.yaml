@@ -1,0 +1,161 @@
+---
+aws-config: &aws_config
+  extension: Terraform
+  tags: aws-native
+  source:
+    location: "git+https://github.com/lacework-dev/detc-resources.git"
+    subdir: "util/aws/config/terraform"
+
+aws-gd-bucket: &aws_gd_bucket
+  extension: S3
+  tags: storage
+  description: This step deploy a S3 bucket for GuardDuty threatlist
+  outputs:
+    - bucket_name
+
+aws-gd: &aws_gd
+  extension: Terraform
+  tags: aws-native
+  source:
+    location: "git+https://github.com/lacework-dev/detc-resources.git"
+    subdir: "util/aws/guardduty/terraform"
+
+aws-sechub: &aws_sechub
+  extension: Terraform
+  tags: aws-native
+  source:
+    location: "git+https://github.com/lacework-dev/detc-resources.git"
+    subdir: "util/aws/sechub/terraform"
+
+
+aws_native_services_setup:
+  required_secrets:
+  - path: attacker.ip
+    prompt: true
+    prompt_question: "what is the public IP of the attacker machine?"
+    description: IP Address of the attacker machine
+  - path: aws.region
+  description: |
+    This plan sets up AWS Config, SecurityHub, & GuardDuty
+  steps:
+    - name: aws-config-us-east-1
+      <<: *aws_config
+      args:
+        cloud: AWS
+        aggregate_findings: "true"
+        region: us-east-1
+
+    - name: aws-config-us-east-2
+      <<: *aws_config
+      args:
+        cloud: AWS
+        region: us-east-2
+
+    - name: aws-config-us-west-1
+      <<: *aws_config
+      args:
+        cloud: AWS
+        region: us-west-1
+
+    - name: aws-config-us-west-2
+      <<: *aws_config
+      args:
+        cloud: AWS
+        region: us-west-2
+
+    - name: aws-guardduty-bucket-us-east-1
+      <<: *aws_gd_bucket
+      args:
+        partial_bucket_name: "gd-bucket"
+        region: us-east-1
+
+    - name: aws-guardduty-bucket-us-east-2
+      <<: *aws_gd_bucket
+      args:
+        partial_bucket_name: "gd-bucket"
+        region: us-east-2
+
+    - name: aws-guardduty-bucket-us-west-1
+      <<: *aws_gd_bucket
+      args:
+        partial_bucket_name: "gd-bucket"
+        region: us-west-1
+
+    - name: aws-guardduty-bucket-us-west-2
+      <<: *aws_gd_bucket
+      args:
+        partial_bucket_name: "gd-bucket"
+        region: us-west-2
+
+    - name: aws-guardduty-us-east-1
+      <<: *aws_gd
+      needs:
+        - aws-guardduty-bucket-us-east-1
+      args:
+        region: us-east-1
+        malicious_ip: !secret attacker.ip
+        cloud: aws
+        bucket: !lookup /aws-guardduty-bucket-us-east-1/outputs/bucket_name
+
+    - name: aws-guardduty-us-east-2
+      <<: *aws_gd
+      needs:
+        - aws-guardduty-bucket-us-east-2
+      args:
+        region: us-east-2
+        malicious_ip: !secret attacker.ip
+        cloud: aws
+        bucket: !lookup /aws-guardduty-bucket-us-east-2/outputs/bucket_name
+
+    - name: aws-guardduty-us-west-1
+      <<: *aws_gd
+      needs:
+        - aws-guardduty-bucket-us-west-1
+      args:
+        region: us-west-1
+        malicious_ip: !secret attacker.ip
+        cloud: aws
+        bucket: !lookup /aws-guardduty-bucket-us-west-1/outputs/bucket_name
+
+    - name: aws-guardduty-us-west-2
+      <<: *aws_gd
+      needs:
+        - aws-guardduty-bucket-us-west-2
+      args:
+        region: us-west-2
+        malicious_ip: !secret attacker.ip
+        cloud: aws
+        bucket: !lookup /aws-guardduty-bucket-us-west-2/outputs/bucket_name
+
+    - name: aws-sechub-us-east-1
+      <<: *aws_sechub
+      needs:
+        - aws-guardduty-us-east-1
+      args:
+        cloud: AWS
+        region: us-east-1
+        aggregate_findings: "true"
+
+    - name: aws-sechub-us-east-2
+      <<: *aws_sechub
+      needs:
+        - aws-guardduty-us-east-2
+      args:
+        cloud: AWS
+        region: us-east-2
+
+    - name: aws-sechub-us-west-1
+      <<: *aws_sechub
+      needs:
+        - aws-guardduty-us-west-1
+      args:
+        cloud: AWS
+        region: us-west-1
+
+    - name: aws-sechub-us-west-2
+      <<: *aws_sechub
+      needs:
+        - aws-guardduty-us-west-2
+      args:
+        cloud: AWS
+        region: us-west-2
