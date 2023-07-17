@@ -12,7 +12,9 @@ locals {
   bucket_name = "${var.partial_bucket_name}-${random_integer.ri.result}"
 }
 
-provider "aws" {}
+provider "aws" {
+  region = var.region
+}
 
 resource "aws_s3_bucket" "bucket" {
   bucket = local.bucket_name
