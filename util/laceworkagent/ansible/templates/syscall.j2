@@ -1,3 +1,6 @@
+etype.exec:
+  group-by:
+    - none
 etype.initmod:
 etype.finitmod:
 etype.file:
@@ -30,31 +33,43 @@ etype.file:
         watchsshconfig:
             watchpath: /etc/ssh/sshd_config
             watchfor: create, modify
-etype.exec:
-    send-if-matches:
-        send-all-sudo:
-            exepath.endswith: sudo
-        send-all-apk:
-            exepath.endswith: apk
-        send-all-apt:
-            exepath.endswith: apt
-        send-all-apt-get:
-            exepath.endswith: apt-get
-        send-all-curl:
-            exepath.endswith: curl
-        send-all-wget:
-            exepath.endswith: wget
-        send-all-echo:
-            exepath.endswith: echo
-        send-all-cat:
-            exepath.endswith: cat
-        send-all-strace:
-            exepath.endswith: strace
-        send-all-chmod:
-            exepath.endswith: chmod
-        send-all-scp:
-            exepath.endswith: scp
-        send-all-export:
-            exepath.endswith: export
-        send-all-ln:
-            exepath.endswith: ln
+        watch-k8s-config1:
+            watchpath: /home/*/.kube/config
+        watch-k8s-config2:
+            watchpath: /etc/kubernetes
+            depth: 3
+        watch-k8s-config3:
+            watchpath: /var/lib/kubelet
+            depth: 2
+        watch-k8s-static-pods:
+            watchpath: /etc/kubernetes/manifests
+        watch-tmp:
+            watchpath: /tmp
+            depth: 3
+        watch-etc-root:
+            watchpath: /etc
+            depth: 3
+        watch-bin:
+            watchpath: /bin
+            depth: 3
+        watch-sbin:
+            watchpath: /sbin
+            depth: 3
+        watch-user-bin:
+            watchpath: /usr/bin
+            depth: 3
+        watch-user-sbin:
+            watchpath: /usr/sbin
+            depth: 3
+        watch-var-log:
+            watchpath: /var/log
+            depth: 3
+        watch-aws-cli-config:
+            watchpath: /home/*/.aws
+            depth: 3
+        watch-gcp-cli-config:
+            watchpath: /home/*/.config/gcloud
+            depth: 3
+        watch-azure-cli-config:
+            watchpath: /home/*/.azure
+            depth: 3
