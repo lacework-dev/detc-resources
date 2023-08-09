@@ -6,6 +6,21 @@ variable "cluster_name" {
   description = "Name of the EKS cluster.  Example: rotate"
 }
 
+variable "enable_imds_v1" {
+  description = "enable the use of IMDSv1"
+  default     = "false"
+}
+
+variable "enable_ebs_csi" {
+  description = "enable EBS CSI driver for PV"
+  default     = "false"
+}
+
+variable "iam_role_additional_policies" {
+  description = "additional iam policies to attach to the worker nodes, comma separated"
+  default     = ""
+}
+
 provider "kubernetes" {
   host                   = data.aws_eks_cluster.cluster.endpoint
   token                  = data.aws_eks_cluster_auth.cluster.token
@@ -48,7 +63,9 @@ provider "aws" {
 }
 
 locals {
-  cluster_name = "eks-demo-${var.cluster_name}"
+  cluster_name       = "eks-demo-${var.cluster_name}"
+  http_tokens        = var.enable_imds_v1 == "true" ? "optional" : "required"
+  extra_iam_policies = split(",", var.iam_role_additional_policies)
 }
 
 module "eks" {
@@ -63,7 +80,16 @@ module "eks" {
   eks_managed_node_group_defaults = {
     disk_size      = 50
     instance_types = ["t2.medium"]
+    metadata_options = {
+      http_tokens = local.http_tokens
+    }
   }
+
+  cluster_addons = var.enable_ebs_csi == "true" ? {
+    aws-ebs-csi-driver = {
+      most_recent = true
+    }
+  } : {}
 
   eks_managed_node_groups = {
     primary = {
@@ -71,6 +97,9 @@ module "eks" {
       min_size               = 1
       desired_size           = 2
       max_size               = 10
+      iam_role_additional_policies = var.enable_ebs_csi ? concat([
+        "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+      ], local.extra_iam_policies) : local.extra_iam_policies
     }
   }
 }
@@ -137,3 +166,4 @@ module "vpc" {
     "kubernetes.io/role/internal-elb"             = "1"
   }
 }
+
