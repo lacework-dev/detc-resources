@@ -12,6 +12,12 @@ aws-k8s:
     - path: eks.enable_cluster_agent
       description: enable collection agent
       default: true
+    - path: eks.enable_ebs_csi
+      description: Enable EBS CSI Driver for K8s PVs
+      default: "false"
+    - path: eks.enable_imds_v1
+      description: Enable IMDSv1
+      default: "true"
     - path: lacework.deploy_agent
       description: deploy lacework agent
       default: true
@@ -22,6 +28,8 @@ aws-k8s:
       args:
         region: !secret aws.region
         cluster_name: sharedeks
+        enable_imds_v1: !secret eks.enable_imds_v1
+        enable_ebs_csi: !secret eks.enable_ebs_csi
       helpers:
         - helper: EKSKubectl
           lifecycle: [ afterCreate ]
