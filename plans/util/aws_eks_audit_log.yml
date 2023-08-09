@@ -1,5 +1,7 @@
 ---
 aws-eks-audit-log:
+  needs:
+    - aws-k8s
   description: |
     This plan configures EKS K8s audit log integration with Lacework
   required_secrets:
