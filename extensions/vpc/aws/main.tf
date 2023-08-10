@@ -1,13 +1,16 @@
 variable "name" {}
 
-variable "subnet" {
+variable "subnet1" {
   default = "10.0.0.0/24"
 }
-variable "subnet1" {
+variable "subnet2" {
   default = "10.0.1.0/24"
 }
 variable "cidr_block" {
   default = "10.0.0.0/16"
+}
+variable "enable_dns_hostnames" {
+  default = false
 }
 
 provider "aws" {}
@@ -18,11 +21,12 @@ resource "aws_vpc" "vpc" {
   tags = {
     Name = "${var.name}_vpc"
   }
+  enable_dns_hostnames = var.enable_dns_hostnames
 }
 
 resource "aws_subnet" "subnet" {
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.subnet
+  cidr_block              = var.subnet1
   availability_zone       = "${data.aws_region.current.name}a"
   map_public_ip_on_launch = "true"
   tags = {
@@ -32,7 +36,7 @@ resource "aws_subnet" "subnet" {
 
 resource "aws_subnet" "subnet1" {
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.subnet1
+  cidr_block              = var.subnet2
   map_public_ip_on_launch = "true"
   availability_zone       = "${data.aws_region.current.name}b"
   tags = {
