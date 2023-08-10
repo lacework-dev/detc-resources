@@ -4,6 +4,18 @@ args:
   name:
     type: string
     required: true
+  cidr_block:
+    type: string
+    required: false
+  subnet1: # cidr
+    type: string
+    required: false
+  subnet2: # cidr
+    type: string
+    required: false
+  enable_dns_hostnames:
+    type: string
+    required: false
 source:
   location: "git+https://github.com/lacework-dev/detc-resources.git"
   subdir: "extensions/vpc/aws"
