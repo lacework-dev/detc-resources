@@ -34,7 +34,10 @@ args:     # These automatically get passed through to the underlying ext as args
   ami_type: ### ubuntu, amazonlinux
     type: string
     required: false
-source: # Where to get the code the underlying ext should run
+  region:
+    type: string
+    required: false
+source:
   location: "git+https://github.com/lacework-dev/detc-resources.git"
   subdir: "extensions/ec2instance"
 extension: # Core extension name/args to set.  These args are static vs the supplied ones above
