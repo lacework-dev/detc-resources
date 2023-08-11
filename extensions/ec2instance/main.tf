@@ -9,6 +9,13 @@ variable "public_ip" { default = true }
 variable "root_vol_size" { default = 40 }
 variable "tags" { default = "" }
 variable "ami_type" { default = "ubuntu" }
+variable "region" {
+  default = ""
+}
+
+provider "aws" {
+  region = var.region
+}
 
 resource "tls_private_key" "keypair" {
   algorithm = "RSA"
