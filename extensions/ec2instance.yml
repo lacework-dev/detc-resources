@@ -37,6 +37,9 @@ args:     # These automatically get passed through to the underlying ext as args
   region:
     type: string
     required: false
+  ssh_public_key:
+    type: string
+    required: false
 source:
   location: "git+https://github.com/lacework-dev/detc-resources.git"
   subdir: "extensions/ec2instance"

@@ -12,18 +12,12 @@ variable "ami_type" { default = "ubuntu" }
 variable "region" {
   default = ""
 }
+variable "ssh_public_key" {
+  default = ""
+}
 
 provider "aws" {
   region = var.region
-}
-
-resource "tls_private_key" "keypair" {
-  algorithm = "RSA"
-}
-
-resource "aws_key_pair" "server-key" {
-  key_name   = "${var.instance_name}-server-key"
-  public_key = tls_private_key.keypair.public_key_openssh
 }
 
 locals {
@@ -42,6 +36,15 @@ locals {
   split_ports   = split(",", var.ports)
   split_sg_arns = split(",", var.security_group_arns)
   new_tags      = split(",", var.tags)
+}
+
+resource "tls_private_key" "keypair" {
+  algorithm = "RSA"
+}
+
+resource "aws_key_pair" "server-key" {
+  key_name   = "${var.instance_name}-server-key"
+  public_key = var.ssh_public_key != "" ? var.ssh_public_key : tls_private_key.keypair.public_key_openssh
 }
 
 data "aws_ami" "ubuntu" {
