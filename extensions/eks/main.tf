@@ -21,6 +21,10 @@ variable "iam_role_additional_policies" {
   default     = ""
 }
 
+variable "managed_nodes_iam_role" {
+  default = ""
+}
+
 provider "kubernetes" {
   host                   = data.aws_eks_cluster.cluster.endpoint
   token                  = data.aws_eks_cluster_auth.cluster.token
@@ -97,7 +101,9 @@ module "eks" {
       min_size               = 1
       desired_size           = 2
       max_size               = 10
-      iam_role_additional_policies = var.enable_ebs_csi ? concat([
+      create_iam_role        = var.managed_nodes_iam_role == "" ? true : false
+      iam_role_arn           = var.managed_nodes_iam_role == "" ? "" : var.managed_nodes_iam_role
+      iam_role_additional_policies = var.enable_ebs_csi && var.managed_nodes_iam_role == "" ? concat([
         "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
       ], local.extra_iam_policies) : local.extra_iam_policies
     }
