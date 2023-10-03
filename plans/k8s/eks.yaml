@@ -3,6 +3,7 @@ aws-k8s:
   required_secrets:
     - path: lacework.access_token
       description: lacework agent token
+      prompt: true
     - path: lacework.api_url
       description: lacework API url
       default: https://agent.lacework.net
