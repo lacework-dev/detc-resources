@@ -1,5 +1,25 @@
 ---
 integrate-accounts:
+  description: |
+    The integrate accounts plan will integrate AWS, GCP, and Azure with your Lacework account. Optionally, you can run individual steps to only integrate the desired CSP using the --step flag.
+
+  required_secrets:
+    - path: lacework.account_name
+      prompt: true
+      prompt_question: "What is the name of your Lacework account (without the lacework.net domain)"
+      description: Lacework Account Name
+    - path: lacework.subaccount_name
+      prompt: true
+      prompt_question: "What is the name of your Lacework subaccount (press enter for none)"
+      description: Lacework Subaccount Name
+    - path: lacework.api_key
+      prompt: true
+      prompt_question: "What is your Lacework API key ID?"
+      description: Lacework Key ID
+    - path: lacework.api_secret
+      prompt: true
+      prompt_question: "What is your Lacework API key secret?"
+      description: Lacework Key Secret
   steps:
     - name: gcp-integration
       extension: Terraform
