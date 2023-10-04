@@ -9,9 +9,9 @@ integrate-accounts:
       prompt_question: "What is the name of your Lacework account (without the lacework.net domain)"
       description: Lacework Account Name
     - path: lacework.subaccount_name
-      prompt: true
-      prompt_question: "What is the name of your Lacework subaccount (press enter for none)"
-      description: Lacework Subaccount Name
+      prompt: false
+      description: Lacework Subaccount Name (optional)
+      default: ""
     - path: lacework.api_key
       prompt: true
       prompt_question: "What is your Lacework API key ID?"
