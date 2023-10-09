@@ -20,6 +20,8 @@ integrate-accounts:
       prompt: true
       prompt_question: "What is your Lacework API key secret?"
       description: Lacework Key Secret
+    - path: lacework.lacework_aws_account_id
+      default: "434813966438"
   steps:
     - name: gcp-integration
       extension: Terraform
@@ -53,6 +55,7 @@ integrate-accounts:
       args:
         cloud: aws
         tfvars:
+          lacework_aws_account_id:  !secret lacework.lacework_aws_account_id
           lacework_account: !secret lacework.account_name
           lacework_subaccount: !secret lacework.subaccount_name
           lacework_apikey: !secret lacework.api_key
