@@ -13,6 +13,8 @@ aws-eks-audit-log:
       prompt: false
     - path: lacework.api_secret
       prompt: false
+    - path: lacework.lacework_aws_account_id
+      default: "434813966438"
   steps:
     - name: aws-eks-audit-log
       extension: Terraform
