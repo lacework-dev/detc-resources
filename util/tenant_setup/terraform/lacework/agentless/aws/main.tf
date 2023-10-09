@@ -11,6 +11,9 @@ variable "lacework_account" {}
 variable "lacework_subaccount" {}
 variable "lacework_apikey" {}
 variable "lacework_apisecret" {}
+variable "lacework_aws_account_id" {
+  default = "434813966438"
+}
 
 provider "lacework" {
   subaccount = var.lacework_subaccount
@@ -46,6 +49,7 @@ module "lacework_aws_agentless_scanning_global" {
 
   global                    = true
   lacework_integration_name = "sidekick_from_terraform"
+  lacework_aws_account_id   = format("%d", var.lacework_aws_account_id)
 }
 
 // The following modules should be included per-region where scanning will occur.
@@ -59,6 +63,7 @@ module "lacework_aws_agentless_scanning_region" {
 
   regional                = true
   global_module_reference = module.lacework_aws_agentless_scanning_global
+  lacework_aws_account_id = format("%d", var.lacework_aws_account_id)
 }
 
 // Create regional resources us-east-2
@@ -72,6 +77,7 @@ module "lacework_aws_agentless_scanning_region_use2" {
 
   regional                = true
   global_module_reference = module.lacework_aws_agentless_scanning_global
+  lacework_aws_account_id = format("%d", var.lacework_aws_account_id)
 }
 
 // Create regional resources us-west-1
@@ -85,6 +91,7 @@ module "lacework_aws_agentless_scanning_region_usw1" {
 
   regional                = true
   global_module_reference = module.lacework_aws_agentless_scanning_global
+  lacework_aws_account_id = format("%d", var.lacework_aws_account_id)
 }
 
 // Create regional resources us-west-2
@@ -98,4 +105,5 @@ module "lacework_aws_agentless_scanning_region_usw2" {
 
   regional                = true
   global_module_reference = module.lacework_aws_agentless_scanning_global
+  lacework_aws_account_id = format("%d", var.lacework_aws_account_id)
 }

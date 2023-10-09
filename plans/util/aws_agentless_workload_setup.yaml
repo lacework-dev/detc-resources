@@ -2,6 +2,9 @@
 lacework_aws_agentless_scanning:
   description: |
     This plan sets up agentless workload scanning in aws
+  required_secrets:
+    - path: lacework.lacework_aws_account_id
+      default: "434813966438"
   steps:
     - name: aws-agentless-workload-setup
       extension: Terraform
@@ -12,6 +15,7 @@ lacework_aws_agentless_scanning:
       args:
         cloud: aws
         tfvars:
+          lacework_aws_account_id:  !secret lacework.lacework_aws_account_id
           lacework_account: !secret lacework.account_name
           lacework_subaccount: !secret lacework.subaccount_name
           lacework_apikey: !secret lacework.api_key
