@@ -29,7 +29,7 @@ provider "aws" {
 }
 
 module "aws_eks_audit_log" {
-  lacework_aws_account_id = var.lacework_aws_account_id
+  lacework_aws_account_id = format("%d", var.lacework_aws_account_id)
   source                  = "lacework/eks-audit-log/aws"
   version                 = "0.4.2"
   cloudwatch_regions      = [var.cluster_region]
