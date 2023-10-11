@@ -2,6 +2,14 @@
 - name: provision voteapp worker
   hosts: all
   tasks:
+    - name: Install Chocolatey version 1
+      block:
+      - name: install Chocolatey CLI v1.4.0
+        win_chocolatey:
+          name: 'chocolatey'
+          state: present
+          version: '1.4.0'
+
     - name: Install dotnet-sdk
       win_chocolatey:
         name:
