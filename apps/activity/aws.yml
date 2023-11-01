@@ -8,10 +8,10 @@ activity-aws:
         subdir: "apps/activity/terraform/aws"
       args:
         cloud: aws
-        user_name: cloudactivity
+        role_name: cloudactivity-role
+        profile_name: cloudactivity-profile
         outputs:
-          - secret_key
-          - access_key
+          - cloud_activity_profile_arn
     - name: activity-generator-vpc
       extension: VPC.AWS
       tags: infrastructure
@@ -23,6 +23,7 @@ activity-aws:
         - activity-generator-vpc
       args:
         ports: "22"
+        instance_profile_arn: !lookup /activity/outputs/cloud_activity_profile_arn
         vpc_id: !lookup /activity-generator-vpc/outputs/vpc_id
         subnet: !lookup /activity-generator-vpc/outputs/subnet_id1
         instance_name: "cloud-activity"
@@ -55,6 +56,4 @@ activity-aws:
           become: true
         extra_vars:
           ansible_user: ubuntu
-          access_key: !lookupSecret /activity/outputs/access_key
-          secret_key: !lookupSecret /activity/outputs/secret_key
           region: !secret aws.region
