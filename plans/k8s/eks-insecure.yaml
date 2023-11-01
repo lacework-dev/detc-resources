@@ -1,0 +1,89 @@
+---
+aws-k8s:
+  required_secrets:
+    - path: lacework.access_token
+      description: lacework agent token
+      prompt: true
+    - path: lacework.api_url
+      description: lacework API url
+      default: https://agent.lacework.net
+    - path: eks.enable_cluster_agent
+      description: enable collection agent
+      default: true
+    - path: eks.enable_ebs_csi
+      description: Enable EBS CSI Driver for K8s PVs
+      default: "false"
+    - path: eks.enable_imds_v1
+      description: Enable IMDSv1
+      default: "true"
+    - path: lacework.deploy_agent
+      description: deploy lacework agent
+      default: true
+  steps:
+    - name: iam-role
+      extension: Terraform
+      description: This step creates a new IAM role for the K8s cluster nodes, allow app management
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: util/aws/iam/eks/nodegroup/insecure_role/terraform/iam
+      args:
+        cloud: AWS
+        outputs:
+          - role_arn
+
+    - name: k8s
+      extension: EKS
+      needs:
+        - iam-role
+      description: This step uses the EKS extension (Terraform under the hood) to deploy the actual cluster. Expect runtimes in excess of 10 minutes
+      args:
+        region: !secret aws.region
+        cluster_name: sharedeks
+        enable_imds_v1: !secret eks.enable_imds_v1
+        enable_ebs_csi: !secret eks.enable_ebs_csi
+        managed_nodes_iam_role: !lookup /iam-role/outputs/role_arn
+      helpers:
+        - helper: EKSKubectl
+          lifecycle: [ afterCreate ]
+
+    - name: lacework-agent
+      extension: Helm
+      condition:
+        - !secret lacework.deploy_agent == true
+      source:
+        - location: git+https://github.com/lacework/helm-charts.git
+        - location: https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/lacework-agent-helm/values.yaml
+          templates:
+            - values.yaml
+        - https://raw.githubusercontent.com/lacework-dev/detc-resources/main/util/laceworkagent/ansible/templates/syscall.j2
+      needs:
+        - k8s
+      helpers:
+        - helper: RunCommand
+          args:
+            commands:
+              - ["mv", "syscall.j2", "lacework-agent/config/syscall_config.yaml"]
+        - helper: WriteValue
+          run_on_dryrun: true
+          args:
+            raw_value: !lookup /aws-k8s/k8s/outputs/kubectl_config
+            dstfile: kube.conf
+      args:
+        kubectl_config_file: kube.conf
+        repos:
+          - name: lacework
+            url: https://lacework.github.io/helm-charts
+        name: lacework-agent
+        namespace: lacework
+        chart: "lacework-agent/"
+        value_files:
+          - values.yaml
+        cluster_type: eks
+        cluster_name: !lookup /aws-k8s/k8s/outputs/cluster_name
+        access_token: !secret lacework.access_token
+        region: !secret aws.region
+        enable_cluster_agent: !secret eks.enable_cluster_agent
+        api_url: !secret lacework.api_url
+        # cluster_agent_tag
+        # agent_tag (datacollector)
+
