@@ -106,7 +106,7 @@ gcp-k8s:
         name: lacework-agent
         namespace: lacework
         chart: "lacework-agent/"
-        region: !secret aws.region
+        region: !secret gcp.region
         value_files:
           - values.yaml
         cluster_type: gke
