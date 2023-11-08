@@ -18,7 +18,7 @@ gcp-gke-audit-logs:
         location: "git+https://github.com/lacework-dev/detc-resources.git"
         subdir: "util/k8s_audit_log/terraform/gke"
       args:
-        cloud: aws
+        cloud: gcp
         tfvars:
           lacework_account: !secret lacework.account_name
           lacework_subaccount: !secret lacework.subaccount_name
