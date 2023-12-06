@@ -25,7 +25,7 @@ integrate-accounts:
   steps:
     - name: gcp-integration
       extension: Terraform
-      source:
+      source: 
         location: "git+https://github.com/lacework-dev/detc-resources.git"
         subdir: "apps/lacework-accounts/gcp"
       args:
