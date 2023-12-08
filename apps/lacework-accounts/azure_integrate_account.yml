@@ -1,0 +1,39 @@
+---
+integrate-account:
+  description: |
+    The integrate account plan will integrate Azure with your Lacework account
+
+  required_secrets:
+    - path: lacework.account_name
+      prompt: true
+      prompt_question: "What is the name of your Lacework account (without the lacework.net domain)"
+      description: Lacework Account Name
+    - path: lacework.subaccount_name
+      prompt: true
+      prompt_question: "What is the name of your Lacework subaccount (enter the account name if none)"
+      description: Lacework Subaccount Name
+    - path: lacework.api_key
+      prompt: true
+      prompt_question: "What is your Lacework API key ID?"
+      description: Lacework Key ID
+    - path: lacework.api_secret
+      prompt: true
+      prompt_question: "What is your Lacework API key secret?"
+      description: Lacework Key Secret
+    - path: lacework.lacework_aws_account_id
+      default: "434813966438"
+  steps:
+    - name: azure-integration
+      extension: Terraform
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "apps/lacework-accounts/azure"
+      args:
+        cloud: azure
+        tfvars:
+          lacework_account: !secret lacework.account_name
+          lacework_subaccount: !secret lacework.subaccount_name
+          lacework_apikey: !secret lacework.api_key
+          lacework_apisecret: !secret lacework.api_secret
+
+
