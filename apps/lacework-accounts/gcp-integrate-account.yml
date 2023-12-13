@@ -1,5 +1,5 @@
 ---
-integrate-account:
+integrate-gcp-account:
   description: |
     The integrate account plan will integrate GCP with your Lacework account
 

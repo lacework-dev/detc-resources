@@ -1,5 +1,5 @@
 ---
-integrate-account:
+integrate-aws-account:
   description: |
     The integrate account plan will integrate AWS with your Lacework account
 

@@ -1,5 +1,5 @@
 ---
-integrate-account:
+integrate-azure-account:
   description: |
     The integrate account plan will integrate Azure with your Lacework account
 
