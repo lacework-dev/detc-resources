@@ -61,7 +61,7 @@ resource "azurerm_linux_virtual_machine" "linuxvm" {
   name                = "${var.instance_name}-machine"
   resource_group_name = azurerm_resource_group.azrg.name
   location            = azurerm_resource_group.azrg.location
-  size                = "standard_ds2"
+  size                = "Standard_DS2_v2"
   admin_username      = "ubuntu"
   network_interface_ids = [
     azurerm_network_interface.azni.id,
