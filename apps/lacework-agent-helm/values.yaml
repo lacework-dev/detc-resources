@@ -3,7 +3,7 @@ laceworkConfig:
   accessToken: {{ .access_token }}
   kubernetesCluster: {{ .cluster_name }}
   codeaware:
-    enable: true
+    enable: experimental
 {{ if eq .enable_cluster_agent "true" }}
 clusterAgent:
   enable: True
