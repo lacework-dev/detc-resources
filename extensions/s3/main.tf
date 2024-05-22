@@ -2,6 +2,10 @@ variable "region" {}
 variable "partial_bucket_name" {
   type = string
 }
+variable "tags" {
+  type = map(string)
+  default = {}
+}
 
 resource "random_integer" "ri" {
   min = 100000
@@ -10,6 +14,7 @@ resource "random_integer" "ri" {
 
 locals {
   bucket_name = "${var.partial_bucket_name}-${random_integer.ri.result}"
+  tags = merge(var.tags, {Name = local.bucket_name})
 }
 
 provider "aws" {
@@ -18,10 +23,7 @@ provider "aws" {
 
 resource "aws_s3_bucket" "bucket" {
   bucket = local.bucket_name
-  tags = {
-    Name        = local.bucket_name
-    Environment = "Production"
-  }
+  tags = local.tags
   force_destroy = true
 }
 

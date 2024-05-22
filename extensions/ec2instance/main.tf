@@ -7,7 +7,10 @@ variable "instance_profile_arn" { default = "" }
 variable "instance_type" { default = "t2.medium" }
 variable "public_ip" { default = true }
 variable "root_vol_size" { default = 40 }
-variable "tags" { default = "" }
+variable "tags" {
+  type = map(string)
+  default = {}
+}
 variable "ami_type" { default = "ubuntu" }
 variable "region" {
   default = ""
@@ -35,7 +38,6 @@ locals {
   }
   split_ports   = split(",", var.ports)
   split_sg_arns = split(",", var.security_group_arns)
-  new_tags      = split(",", var.tags)
 }
 
 resource "tls_private_key" "keypair" {
@@ -88,9 +90,7 @@ resource "aws_security_group" "ingress-from-all" {
 }
 
 resource "aws_instance" "instance-server" {
-  tags = merge({ "Name" = "${var.instance_name}" }, {
-    for t in local.new_tags : element(split("=", t), 0) => element(split("=", t), 1) if t != ""
-  })
+  tags = merge({"Name" = var.instance_name}, var.tags)
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = var.instance_type
   associate_public_ip_address = tobool(var.public_ip)

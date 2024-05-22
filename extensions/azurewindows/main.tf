@@ -22,6 +22,16 @@ provider "azurerm" {
   features {}
 }
 
+variable "tags" {
+  type = map(string)
+  default = {}
+}
+
+variable "sg_tags" {
+  type = map(string)
+  default = {}
+}
+
 resource "azurerm_resource_group" "azrg" {
   name     = "${var.instance_name}-rg"
   location = var.region
@@ -32,13 +42,14 @@ resource "azurerm_public_ip" "azpubip" {
   location            = azurerm_resource_group.azrg.location
   resource_group_name = azurerm_resource_group.azrg.name
   allocation_method   = "Dynamic"
+  tags = var.sg_tags
 }
 
 resource "azurerm_network_interface" "azni" {
   name                = "${var.instance_name}-nic"
   location            = azurerm_resource_group.azrg.location
   resource_group_name = azurerm_resource_group.azrg.name
-
+  tags = var.sg_tags
   ip_configuration {
     name                          = "internal"
     subnet_id                     = var.subnet_id
@@ -58,6 +69,7 @@ resource "azurerm_windows_virtual_machine" "windowsvm" {
   network_interface_ids = [
     azurerm_network_interface.azni.id,
   ]
+  tags = var.tags
 
   os_disk {
     caching              = "ReadWrite"
@@ -89,6 +101,7 @@ resource "azurerm_virtual_machine_extension" "winrm_listener" {
   type                 = "CustomScriptExtension"
   type_handler_version = "1.9"
   settings             = jsonencode({ "commandToExecute" = "powershell.exe -ExecutionPolicy Unrestricted -encodedCommand ${textencodebase64(local.run_command, "UTF-16LE")}" })
+  tags = var.tags
 }
 
 
@@ -101,6 +114,7 @@ resource "azurerm_network_security_group" "nsg" {
   name                = "${var.instance_name}-nsg"
   location            = azurerm_resource_group.azrg.location
   resource_group_name = azurerm_resource_group.azrg.name
+  tags = var.sg_tags
 
   security_rule {   //Here opened WinRMport
     name                       = "winrm"

@@ -13,14 +13,14 @@ activity-gcp:
           - creds
     - name: activity-generator
       extension: GCPCompute
-      tags: infra
+      tags: infrastructure
       needs:
         - activity
       args:
         region: !secret gcp.region
         project: !secret gcp.project_id
         instance_name: "activity-generator"
-        tags: "activity-generator"
+        tags: '{"type" = "activity-generator"}'
     - name: setup-activity-generation
       extension: Ansible
       source:

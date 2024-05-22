@@ -80,6 +80,8 @@ VoteAppAKS:
         username: !secret windows.username
         instance_name: "voteapp-worker"
         subnet_id: !lookup /azure-k8s/k8s/outputs/cluster_subnet_id
+        tags: '{"deployment" = "voteapp", "environment" = "production", "type" = "compute", security= "internet-exposed"}'
+        sg_tags: '{"deployment" = "voteapp", "environment" = "production", "type" = "network", security= "internet-exposed"}'
     - name: traffic
       extension: Ansible
       source: https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/traffic/install_traffic.yml

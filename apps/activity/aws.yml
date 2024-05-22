@@ -27,6 +27,7 @@ activity-aws:
         vpc_id: !lookup /activity-generator-vpc/outputs/vpc_id
         subnet: !lookup /activity-generator-vpc/outputs/subnet_id1
         instance_name: "cloud-activity"
+        tags: '{"type" = "activity-generator"}'
 
     - name: setup-activity-generation
       extension: Ansible

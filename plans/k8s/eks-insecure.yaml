@@ -42,6 +42,8 @@ aws-k8s:
         enable_imds_v1: !secret eks.enable_imds_v1
         enable_ebs_csi: !secret eks.enable_ebs_csi
         managed_nodes_iam_role: !lookup /iam-role/outputs/role_arn
+        tags: '{"deployment" = "ecommerce", "environment" = "production", "type" = "compute"}'
+        cluster_tags: '{"deployment" = "ecommerce", "environment" = "production", "type" = "compute"}'
       helpers:
         - helper: EKSKubectl
           lifecycle: [ afterCreate ]

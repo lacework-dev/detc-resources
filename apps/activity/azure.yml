@@ -12,7 +12,7 @@ activity-azure:
           - creds
     - name: activity-generator
       extension: AzureCompute
-      tags: infra
+      tags: infrastructure
       needs:
         - activity
       args:

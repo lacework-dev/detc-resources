@@ -22,6 +22,9 @@ gcp-k8s:
         region: !secret gcp.region
         project: !secret gcp.project_id
         cluster_name: sharedgke
+        cluster_labels: '{"environment" = "production", "deployment" = "ticketing", "type" = "cluster", "misc" = "cluster_labels"}'
+        nodes_labels: ' {"all" = {"environment" = "production", "deployment" = "ticketing", "type" = "compute", "misc" = "node_label"}, "default-node-pool" = { "default-node-pool" = true}}'
+        # node_pools_labels: '{"environment" = "production", "deployment" = "ticketing", "type" = "compute", "misc" = "node_pools_labels"}'
       helpers:
         - helper: GKEKubectl
           lifecycle: [ afterCreate ]
@@ -114,5 +117,3 @@ gcp-k8s:
         access_token: !secret lacework.access_token
         api_url: !secret lacework.api_url
         enable_cluster_agent: !secret gke.enable_cluster_agent
-        # cluster_agent_tag:
-        # agent_tag (datacollector):

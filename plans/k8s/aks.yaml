@@ -25,6 +25,8 @@ azure-k8s:
         azure_subscription_id: !secret azure.subscription_id
         azure_tenant_id: !secret azure.tenant_id
         azure_location: !secret azure.region
+        tags: '{"deployment" = "voteapp", "environment" = "production", "type" = "compute"}'
+        sg_tags: '{"deployment" = "voteapp", "environment" = "production", "type" = "compute"}'
 
     - name: lacework-agent-legacy
       extension: Kubectl

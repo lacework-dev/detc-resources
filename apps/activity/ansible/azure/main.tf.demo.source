@@ -8,6 +8,10 @@ variable "address_prefix" {
 variable "client_id" {}
 variable "client_secret" {}
 variable "tenant_id" {}
+variable "tags" {
+  type = map(string)
+  default = {}
+}
 
 provider "azurerm" {
   subscription_id = var.subscription
@@ -47,7 +51,5 @@ resource "azurerm_virtual_network" "virtualnetwork" {
     security_group = azurerm_network_security_group.securitygroup.id
   }
 
-  tags = {
-    environment = "Production"
-  }
+  tags = var.tags
 }

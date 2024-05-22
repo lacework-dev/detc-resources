@@ -10,7 +10,15 @@ variable "instance_class" { default = "db.t3.micro" }
 variable "publicly_accessible" { default = false }
 variable "engine_version" { default = null }
 variable "port" { default = null }
-variable "tags" { default = "" }
+variable "tags" {
+  type = map(string)
+  default = {}
+}
+variable "sg_tags" {
+  type = map(string)
+  default = {}
+}
+
 variable "parameter_group_family" { default = null }
 variable "engine" {
   default = "postgres"
@@ -21,9 +29,7 @@ variable "engine" {
   }
 }
 
-
 locals {
-  new_tags = split(",", var.tags)
   engine_details = {
     "postgres" = {
       "engine"                 = "postgres"
@@ -46,9 +52,7 @@ locals {
 resource "aws_db_subnet_group" "db_subnet_group" {
   name       = "${var.name}-subnet-grp"
   subnet_ids = [var.subnet1, var.subnet2]
-  tags = merge({ "Name" = "${var.name}" }, {
-    for t in local.new_tags : element(split("=", t), 0) => element(split("=", t), 1) if t != ""
-  })
+  tags = merge({"Name" = var.name}, var.sg_tags)
 }
 
 resource "aws_db_parameter_group" "db_parameter_group" {
@@ -63,9 +67,7 @@ resource "aws_db_parameter_group" "db_parameter_group" {
     }
   }
 
-  tags = merge({ "Name" = "${var.name}" }, {
-    for t in local.new_tags : element(split("=", t), 0) => element(split("=", t), 1) if t != ""
-  })
+  tags = merge({"Name" = var.name}, var.tags)
 }
 
 resource "aws_security_group" "rds" {
@@ -86,9 +88,7 @@ resource "aws_security_group" "rds" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = merge({ "Name" = "${var.name}" }, {
-    for t in local.new_tags : element(split("=", t), 0) => element(split("=", t), 1) if t != ""
-  })
+  tags = merge({"Name" = var.name}, var.sg_tags)
 }
 
 resource "aws_db_instance" "rds" {
@@ -104,9 +104,7 @@ resource "aws_db_instance" "rds" {
   parameter_group_name   = aws_db_parameter_group.db_parameter_group.name
   publicly_accessible    = var.publicly_accessible
   skip_final_snapshot    = var.skip_final_snapshot
-  tags = merge({ "Name" = "${var.name}" }, {
-    for t in local.new_tags : element(split("=", t), 0) => element(split("=", t), 1) if t != ""
-  })
+  tags = merge({"Name" = var.name}, var.tags)
 }
 
 output "engine" {

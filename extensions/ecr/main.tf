@@ -1,4 +1,10 @@
 variable "registry_name" {}
+
+variable "tags" {
+  type = map(string)
+  default = {}
+}
+
 terraform {
   required_providers {
     aws = {
@@ -34,7 +40,7 @@ resource "aws_iam_role" "registry_access_role" {
   "Statement": [
     {
       "Effect": "Allow",
-      "Principal": { 
+      "Principal": {
         "AWS": "${aws_iam_user.ecr_registry_user.arn}"
       },
       "Action": [

@@ -1,5 +1,5 @@
 ---
-name: AKS 
+name: AKS
 args:
   azure_app_id:
     type: string
@@ -22,11 +22,17 @@ args:
   instance_size:
     type: string
     required: false
+  tags:
+    type: string
+    required: false
+  sg_tags:
+    type: string
+    required: false
 source:
   location: "git+https://github.com/lacework-dev/detc-resources.git"
   subdir: "extensions/aks"
 extension: # Core extension name/args to set.  These args are static vs the supplied ones above
-  name: Terraform 
+  name: Terraform
   args:
     cloud: Azure
     outputs:

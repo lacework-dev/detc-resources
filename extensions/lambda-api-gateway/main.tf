@@ -7,10 +7,10 @@ variable "lambda_handler" {}
 variable "vpc_id" {}
 variable "subnet_0" {}
 variable "subnet_1" {}
-variable "tags" { default = "" }
 
-locals {
-   new_tags = split(",", var.tags)
+variable "tags" {
+  type = map(string)
+  default = {}
 }
 
 provider "aws" {}
@@ -95,9 +95,7 @@ resource "aws_default_security_group" "lambda_security_group" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = merge({ "Name" =  "${var.lambda_name}-security-group" }, {
-     for t in local.new_tags : element(split("=", t), 0) => element(split("=", t), 1) if t != ""
-  })
+  tags = merge({ "Name" =  "${var.lambda_name}-security-group" }, var.tags)
 }
 
 resource "aws_lambda_function" "lambda_func" {

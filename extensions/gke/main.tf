@@ -10,6 +10,27 @@ variable "cluster_name" {
   description = "Name of the gke cluster. Example: gke-cluster-foo"
 }
 
+variable cluster_labels {
+  type = map(string)
+  default = {}
+}
+
+variable nodes_labels {
+  type = map(map(string))
+  default = {
+    all = {}
+
+    default-node-pool = {
+      default-node-pool = true
+    }
+  }
+}
+
+variable "tags" {
+  type = map(string)
+  default = {}
+}
+
 terraform {
   required_providers {
     google = {
@@ -39,6 +60,9 @@ module "gke" {
   release_channel   = "UNSPECIFIED"
 
   skip_provisioners = true
+
+  cluster_resource_labels = var.cluster_labels
+  node_pools_labels = var.nodes_labels
 
   node_pools = [
     {

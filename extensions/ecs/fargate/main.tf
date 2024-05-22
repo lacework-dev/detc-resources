@@ -1,6 +1,9 @@
 variable "cluster_name" {}
 variable "aws_region" {}
-
+variable "tags" {
+  type = map(string)
+  default = {}
+}
 terraform {
   required_providers {
     aws = {

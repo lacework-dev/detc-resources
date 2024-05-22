@@ -26,6 +26,16 @@ variable "instance_size" {
   default = "standard_ds2"
 }
 
+variable "tags" {
+  type = map(string)
+  default = {}
+}
+
+variable "sg_tags" {
+  type = map(string)
+  default = {}
+}
+
 terraform {
   required_providers {
     azurerm = {
@@ -54,16 +64,14 @@ provider "azurerm" {
 resource "azurerm_resource_group" "default" {
   name     = "${local.cluster_name}-rg"
   location = var.azure_location
-
-  tags = {
-    environment = var.deployment_name
-  }
+  tags = merge({name = var.deployment_name}, var.sg_tags)
 }
 
 resource "azurerm_network_security_group" "default" {
   name                = "${local.cluster_name}-sg"
   location            = azurerm_resource_group.default.location
   resource_group_name = azurerm_resource_group.default.name
+  tags = merge({name = var.deployment_name}, var.sg_tags)
 }
 
 resource "azurerm_virtual_network" "default" {
@@ -71,6 +79,7 @@ resource "azurerm_virtual_network" "default" {
   location            = azurerm_resource_group.default.location
   resource_group_name = azurerm_resource_group.default.name
   address_space       = ["10.0.0.0/8"]
+  tags = merge({name = var.deployment_name}, var.sg_tags)
 }
 
 resource "azurerm_subnet" "aks" {
@@ -86,6 +95,7 @@ resource "azurerm_kubernetes_cluster" "default" {
   resource_group_name                 = azurerm_resource_group.default.name
   dns_prefix                          = "${local.cluster_name}-k8s"
   private_cluster_public_fqdn_enabled = true
+  tags = merge({name = var.deployment_name}, var.tags)
 
   default_node_pool {
     name            = "default"
@@ -93,6 +103,7 @@ resource "azurerm_kubernetes_cluster" "default" {
     vm_size         = var.instance_size
     os_disk_size_gb = 30
     vnet_subnet_id  = azurerm_subnet.aks.id
+    tags = merge({name = var.deployment_name}, var.tags)
   }
 
   service_principal {
@@ -108,4 +119,3 @@ resource "azurerm_kubernetes_cluster" "default" {
     docker_bridge_cidr = "10.2.0.0/24"
   }
 }
-

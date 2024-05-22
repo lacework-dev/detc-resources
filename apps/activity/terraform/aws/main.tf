@@ -1,5 +1,9 @@
 variable "role_name" {}
 variable "profile_name" {}
+variable "tags" {
+  type = map(string)
+  default = {}
+}
 
 resource "aws_iam_role" "cloud_activity_role" {
   name = "${var.role_name}"
@@ -20,9 +24,7 @@ resource "aws_iam_role" "cloud_activity_role" {
 }
 EOF
 
-  tags = {
-      tag-key = "tag-value"
-  }
+  tags = var.tags
 }
 
 resource "aws_iam_instance_profile" "cloud_activity_profile" {

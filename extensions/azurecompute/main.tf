@@ -6,6 +6,11 @@ variable "region" {
   description = "Azure region"
 }
 
+variable "tags" {
+  type = map(string)
+  default = {}
+}
+
 provider "azurerm" {
   features {}
 }

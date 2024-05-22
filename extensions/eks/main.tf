@@ -25,6 +25,16 @@ variable "managed_nodes_iam_role" {
   default = ""
 }
 
+variable "tags" {
+  type = map(string)
+  default = {}
+}
+
+variable "cluster_tags" {
+  type = map(string)
+  default = {}
+}
+
 provider "kubernetes" {
   host                   = data.aws_eks_cluster.cluster.endpoint
   token                  = data.aws_eks_cluster_auth.cluster.token
@@ -81,9 +91,13 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
+  tags = var.tags
+  cluster_tags = var.cluster_tags
+
   eks_managed_node_group_defaults = {
     disk_size      = 50
     instance_types = ["t2.medium"]
+    tags = var.tags
     metadata_options = {
       http_tokens = local.http_tokens
     }
@@ -98,6 +112,7 @@ module "eks" {
   eks_managed_node_groups = {
     primary = {
       vpc_security_group_ids = [aws_security_group.all_worker_mgmt.id]
+      tags = var.tags
       min_size               = 1
       desired_size           = 2
       max_size               = 10

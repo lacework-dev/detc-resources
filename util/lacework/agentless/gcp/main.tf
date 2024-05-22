@@ -2,7 +2,7 @@ terraform {
   required_providers {
     lacework = {
       source  = "lacework/lacework"
-      version = "1.18.0"
+      version = "1.18.2"
     }
   }
 }
@@ -50,7 +50,7 @@ locals {
 
 module "lacework_gcp_agentless_scanning_project_multi_region_use1" {
   source  = "lacework/agentless-scanning/gcp"
-  version = "~> 0.1"
+  version = "0.3.11"
 
   providers = {
     google = google.use1
@@ -64,7 +64,7 @@ module "lacework_gcp_agentless_scanning_project_multi_region_use1" {
 
 module "lacework_gcp_agentless_scanning_project_multi_region_usc1" {
   source  = "lacework/agentless-scanning/gcp"
-  version = "~> 0.1"
+  version = "0.3.11"
 
   providers = {
     google = google.usc1
@@ -77,7 +77,7 @@ module "lacework_gcp_agentless_scanning_project_multi_region_usc1" {
 
 module "lacework_gcp_agentless_scanning_project_multi_region_use4" {
   source  = "lacework/agentless-scanning/gcp"
-  version = "~> 0.1"
+  version = "0.3.11"
 
   providers = {
     google = google.use4
@@ -90,10 +90,23 @@ module "lacework_gcp_agentless_scanning_project_multi_region_use4" {
 
 module "lacework_gcp_agentless_scanning_project_multi_region_usw1" {
   source  = "lacework/agentless-scanning/gcp"
-  version = "~> 0.1"
+  version = "0.3.11"
 
   providers = {
     google = google.usw1
+  }
+
+  project_filter_list     = local.gcp_proj_filter
+  regional                = true
+  global_module_reference = module.lacework_gcp_agentless_scanning_project_multi_region_use1
+}
+
+module "lacework_gcp_agentless_scanning_project_multi_region_usw2" {
+  source  = "lacework/agentless-scanning/gcp"
+  version = "0.3.11"
+
+  providers = {
+    google = google.usw2
   }
 
   project_filter_list     = local.gcp_proj_filter
