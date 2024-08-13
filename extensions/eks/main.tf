@@ -45,27 +45,27 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "= 4.42"
+      version = "5.60.0"
     }
 
     local = {
       source  = "hashicorp/local"
-      version = "2.1.0"
+      version = "2.5.1"
     }
 
     null = {
       source  = "hashicorp/null"
-      version = "3.1.0"
+      version = "3.2.2"
     }
 
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.10"
+      version = "2.31.0"
     }
 
     tls = {
       source  = "hashicorp/tls"
-      version = "3.4.0"
+      version = "4.0.5"
     }
   }
 
@@ -161,7 +161,7 @@ data "aws_availability_zones" "available" {}
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "3.2.0"
+  version = "5.9.0"
 
   name                       = "${local.cluster_name}-vpc"
   cidr                       = "10.0.0.0/16"

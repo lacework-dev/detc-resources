@@ -8,7 +8,7 @@ provider "aws" {
 
 module "single_account_single_region" {
   source  = "grem11n/vpc-peering/aws"
-  version = "6.0.0"
+  version = "7.0.0"
 
   providers = {
     aws.this = aws

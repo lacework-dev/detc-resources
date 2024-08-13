@@ -35,7 +35,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 4.45.0, <= 4.52.0"
+      version = "5.39.1"
     }
   }
 
@@ -48,18 +48,17 @@ provider "google" {
 }
 
 module "gke" {
-  source            = "terraform-google-modules/kubernetes-engine/google"
-  version           = "24.1.0"
-  project_id        = var.project
-  name              = var.cluster_name
-  region            = var.region
-  network           = "${var.project}-vpc"
-  subnetwork        = module.vpc.subnets_names[0]
-  ip_range_pods     = "${var.project}-ip-range-pods-name"
-  ip_range_services = "${var.project}-ip-range-services-name"
-  release_channel   = "UNSPECIFIED"
-
-  skip_provisioners = true
+  source              = "terraform-google-modules/kubernetes-engine/google"
+  version             = "31.1.0"
+  project_id          = var.project
+  name                = var.cluster_name
+  region              = var.region
+  network             = "${var.project}-vpc"
+  subnetwork          = module.vpc.subnets_names[0]
+  ip_range_pods       = "${var.project}-ip-range-pods-name"
+  ip_range_services   = "${var.project}-ip-range-services-name"
+  release_channel     = "UNSPECIFIED"
+  deletion_protection = false
 
   cluster_resource_labels = var.cluster_labels
   node_pools_labels = var.nodes_labels
@@ -74,7 +73,7 @@ module "gke" {
 
 module "vpc" {
   source  = "terraform-google-modules/network/google"
-  version = "5.2"
+  version = "9.1.0"
 
   project_id   = var.project
   network_name = "${var.project}-vpc"
@@ -104,7 +103,7 @@ module "vpc" {
 module "gke_auth" {
   source     = "terraform-google-modules/kubernetes-engine/google//modules/auth"
   depends_on = [module.gke]
-  version    = "24.1.0"
+  version    = "31.1.0"
 
   project_id           = var.project
   cluster_name         = var.cluster_name

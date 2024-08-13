@@ -2,15 +2,15 @@ terraform {
   required_providers {
     azuread = {
       source  = "hashicorp/azuread"
-      version = "2.31"
+      version = "2.53.1"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "2.91.0"
+      version = "3.114.0"
     }
     lacework = {
       source  = "lacework/lacework"
-      version = "1.18.0"
+      version = "1.19.1"
     }
   }
 }
