@@ -2,7 +2,7 @@ terraform {
   required_providers {
     lacework = {
       source  = "lacework/lacework"
-      version = "1.19.1"
+      version = "2.0.5"
     }
   }
 }
@@ -31,7 +31,7 @@ provider "aws" {
 module "aws_eks_audit_log" {
   lacework_aws_account_id = format("%d", var.lacework_aws_account_id)
   source                  = "lacework/eks-audit-log/aws"
-  version                 = "1.1.5"
+  version                 = "1.1.6"
   cloudwatch_regions      = [var.cluster_region]
   cluster_names           = [var.cluster_name]
   bucket_force_destroy    = true
