@@ -2,7 +2,7 @@ terraform {
   required_providers {
     lacework = {
       source  = "lacework/lacework"
-      version = "1.19.1"
+      version = "1.19.2"
     }
   }
 }
@@ -26,7 +26,7 @@ provider "aws" {}
 
 module "aws_config" {
   source                  = "lacework/config/aws"
-  version                 = "0.15.0"
+  version                 = "0.15.1"
   lacework_aws_account_id = format("%d", var.lacework_aws_account_id)
 }
 
