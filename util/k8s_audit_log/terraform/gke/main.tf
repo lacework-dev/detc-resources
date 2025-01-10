@@ -25,6 +25,6 @@ provider "lacework" {
 
 module "gcp_project_level_gke_audit_log" {
   source           = "lacework/gke-audit-log/gcp"
-  version          = "0.6.2"
+  version          = "0.6.3"
   integration_type = "PROJECT"
 }
