@@ -45,7 +45,7 @@ provider "aws" {
 // This will also create a new Cloud Account Integration within the Lacework console.
 module "lacework_aws_agentless_scanning_global" {
   source  = "lacework/agentless-scanning/aws"
-  version = "0.18.0"
+  version = "0.18.4"
 
   global                    = true
   lacework_integration_name = "sidekick_from_terraform"
@@ -59,7 +59,7 @@ module "lacework_aws_agentless_scanning_global" {
 // Create regional resources us-east-1
 module "lacework_aws_agentless_scanning_region" {
   source  = "lacework/agentless-scanning/aws"
-  version = "0.18.0"
+  version = "0.18.4"
 
   regional                = true
   global_module_reference = module.lacework_aws_agentless_scanning_global
@@ -69,7 +69,7 @@ module "lacework_aws_agentless_scanning_region" {
 // Create regional resources us-east-2
 module "lacework_aws_agentless_scanning_region_use2" {
   source  = "lacework/agentless-scanning/aws"
-  version = "0.18.0"
+  version = "0.18.4"
 
   providers = {
     aws = aws.use2
@@ -83,7 +83,7 @@ module "lacework_aws_agentless_scanning_region_use2" {
 // Create regional resources us-west-1
 module "lacework_aws_agentless_scanning_region_usw1" {
   source  = "lacework/agentless-scanning/aws"
-  version = "0.18.0"
+  version = "0.18.4"
 
   providers = {
     aws = aws.usw1
@@ -97,7 +97,7 @@ module "lacework_aws_agentless_scanning_region_usw1" {
 // Create regional resources us-west-2
 module "lacework_aws_agentless_scanning_region_usw2" {
   source  = "lacework/agentless-scanning/aws"
-  version = "0.18.0"
+  version = "0.18.4"
 
   providers = {
     aws = aws.usw2
