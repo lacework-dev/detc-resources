@@ -2,11 +2,11 @@ terraform {
   required_providers {
     azuread = {
       source  = "hashicorp/azuread"
-      version = "2.53.1"
+      version = "3.0.2"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "3.114.0"
+      version = "4.15.0"
     }
     lacework = {
       source  = "lacework/lacework"
@@ -37,12 +37,12 @@ provider "azurerm" {
 
 module "az_ad_application" {
   source  = "lacework/ad-application/azure"
-  version = "1.3.0"
+  version = "2.0.1"
 }
 
 module "az_config" {
   source                      = "lacework/config/azure"
-  version                     = "2.1.0"
+  version                     = "3.0.3"
   application_id              = module.az_ad_application.application_id
   application_password        = module.az_ad_application.application_password
   service_principal_id        = module.az_ad_application.service_principal_id
@@ -51,7 +51,7 @@ module "az_config" {
 
 module "az_activity_log" {
   source                      = "lacework/activity-log/azure"
-  version                     = "2.3.0"
+  version                     = "3.0.3"
   application_id              = module.az_ad_application.application_id
   application_password        = module.az_ad_application.application_password
   service_principal_id        = module.az_ad_application.service_principal_id
