@@ -2,7 +2,7 @@ terraform {
   required_providers {
     lacework = {
       source  = "lacework/lacework"
-      version = "1.19.1"
+      version = "2.0.5"
     }
     google = {
       source  = "hashicorp/google"
@@ -25,11 +25,9 @@ provider "lacework" {
 
 module "gcp_project_level_config" {
   source  = "lacework/config/gcp"
-  version = "3.1.0"
 }
 
 module "gcp_project_level_pub_sub_audit_log" {
   source           = "lacework/pub-sub-audit-log/gcp"
-  version          = "0.6.0"
   integration_type = "PROJECT"
 }
