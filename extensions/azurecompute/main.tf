@@ -46,7 +46,7 @@ resource "azurerm_public_ip" "azpubip" {
   name                = "myPublicIP"
   location            = azurerm_resource_group.azrg.location
   resource_group_name = azurerm_resource_group.azrg.name
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
 }
 
 resource "azurerm_network_interface" "azni" {
@@ -87,6 +87,32 @@ resource "azurerm_linux_virtual_machine" "linuxvm" {
     offer     = "UbuntuServer"
     sku       = "18.04-LTS"
     version   = "latest"
+  }
+
+}
+
+
+resource "azurerm_network_interface_security_group_association" "nisga" {
+  network_interface_id      = azurerm_network_interface.azni.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
+
+resource "azurerm_network_security_group" "nsg" {
+  name                = "${var.instance_name}-nsg"
+  location            = azurerm_resource_group.azrg.location
+  resource_group_name = azurerm_resource_group.azrg.name
+  # tags = var.sg_tags
+
+  security_rule {   //Here opened WinRMport
+    name                       = "ssh"
+    priority                   = 1010
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
   }
 }
 
