@@ -50,7 +50,7 @@ locals {
 
 module "lacework_gcp_agentless_scanning_project_multi_region_use1" {
   source  = "lacework/agentless-scanning/gcp"
-  version = "2.1.3"
+  version = "2.1.4"
 
   providers = {
     google = google.use1
@@ -60,11 +60,12 @@ module "lacework_gcp_agentless_scanning_project_multi_region_use1" {
   global                    = true
   regional                  = true
   lacework_integration_name = "agentless_from_terraform"
+  integration_type          = "PROJECT"
 }
 
 module "lacework_gcp_agentless_scanning_project_multi_region_usc1" {
   source  = "lacework/agentless-scanning/gcp"
-  version = "2.1.3"
+  version = "2.1.4"
 
   providers = {
     google = google.usc1
@@ -73,11 +74,12 @@ module "lacework_gcp_agentless_scanning_project_multi_region_usc1" {
   project_filter_list     = local.gcp_proj_filter
   regional                = true
   global_module_reference = module.lacework_gcp_agentless_scanning_project_multi_region_use1
+  integration_type        = "PROJECT"
 }
 
 module "lacework_gcp_agentless_scanning_project_multi_region_use4" {
   source  = "lacework/agentless-scanning/gcp"
-  version = "2.1.3"
+  version = "2.1.4"
 
   providers = {
     google = google.use4
@@ -86,11 +88,12 @@ module "lacework_gcp_agentless_scanning_project_multi_region_use4" {
   project_filter_list     = local.gcp_proj_filter
   regional                = true
   global_module_reference = module.lacework_gcp_agentless_scanning_project_multi_region_use1
+  integration_type        = "PROJECT"
 }
 
 module "lacework_gcp_agentless_scanning_project_multi_region_usw1" {
   source  = "lacework/agentless-scanning/gcp"
-  version = "2.1.3"
+  version = "2.1.4"
 
   providers = {
     google = google.usw1
@@ -99,11 +102,12 @@ module "lacework_gcp_agentless_scanning_project_multi_region_usw1" {
   project_filter_list     = local.gcp_proj_filter
   regional                = true
   global_module_reference = module.lacework_gcp_agentless_scanning_project_multi_region_use1
+  integration_type        = "PROJECT"
 }
 
 module "lacework_gcp_agentless_scanning_project_multi_region_usw2" {
   source  = "lacework/agentless-scanning/gcp"
-  version = "2.1.3"
+  version = "2.1.4"
 
   providers = {
     google = google.usw2
@@ -112,4 +116,5 @@ module "lacework_gcp_agentless_scanning_project_multi_region_usw2" {
   project_filter_list     = local.gcp_proj_filter
   regional                = true
   global_module_reference = module.lacework_gcp_agentless_scanning_project_multi_region_use1
+  integration_type        = "PROJECT"
 }
