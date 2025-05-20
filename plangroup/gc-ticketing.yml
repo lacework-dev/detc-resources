@@ -2,7 +2,6 @@
 - https://raw.githubusercontent.com/lacework-dev/detc-resources/main/plans/k8s/gke.yaml
 - https://raw.githubusercontent.com/lacework-demo/ticketing-app/main/deploy/ticketing-gcp.yaml
 - https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/activity/gcp.yml
-- https://raw.githubusercontent.com/lacework-dev/detc-resources/main/plans/util/gcp_agentless.yaml
 - https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/lacework-admission-controller/gke.yaml
 - https://raw.githubusercontent.com/lacework-dev/detc-resources/main/apps/lacework-accounts/gcp-integrate-account.yml
 - https://raw.githubusercontent.com/lacework-dev/detc-resources/main/plans/util/gcp_gke_audit_log.yml
