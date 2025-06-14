@@ -1,0 +1,43 @@
+lacework-azure-agentless:
+  required_secrets:
+    - path: azure.region
+      prompt: false
+    - path: azure.subscription_id
+      prompt: false
+    - path: azure.tenant_id
+      prompt: false
+  description: |
+    This plan sets up agentless workload scanning in Azure
+  steps:
+    - name: azure-login
+
+      extension: Terraform
+      tags: lacework
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "util/azure/login"
+      args:
+        cloud: azure
+        tfvars:
+          azure_tenant_id: !secret azure.tenant_id
+          azure_subscription: !secret azure.subscription_id
+          azure_app_id: !secret azure.app_id
+          azure_password: !secret azure.password
+    - name: azure-agentless-workload-setup
+      extension: Terraform
+      tags: lacework
+      needs:
+        - azure-login
+      source:
+        location: "git+https://github.com/lacework-dev/detc-resources.git"
+        subdir: "util/lacework/agentless/azure"
+      args:
+        cloud: azure
+        tfvars:
+          azure_region: !secret azure.region
+          azure_subscription_id: !secret azure.subscription_id
+          azure_tenant_id: !secret azure.tenant_id
+          lacework_account: !secret lacework.account_name
+          lacework_subaccount: !secret lacework.subaccount_name
+          lacework_apikey: !secret lacework.api_key
+          lacework_apisecret: !secret lacework.api_secret
