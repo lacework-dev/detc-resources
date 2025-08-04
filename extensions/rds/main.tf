@@ -39,7 +39,7 @@ locals {
     }
     "mysql" = {
       "engine"                 = "mysql"
-      "engine_version"         = "8.0.32"
+      "engine_version"         = "8.0.42"
       "port"                   = 3306
       "parameter_group_family" = "mysql8.0"
     }
