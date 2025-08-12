@@ -168,7 +168,12 @@ resource "aws_api_gateway_deployment" "apideploy" {
   ]
 
   rest_api_id = aws_api_gateway_rest_api.api_lambda.id
-  stage_name  = var.api_endpoint_name
+}
+
+resource "aws_api_gateway_stage" "api_stage" {
+  deployment_id = aws_api_gateway_deployment.apideploy.id
+  rest_api_id   = aws_api_gateway_rest_api.api_lambda.id
+  stage_name    = var.api_endpoint_name
 }
 
 resource "aws_lambda_permission" "api_gateway_permission" {
@@ -183,5 +188,5 @@ resource "aws_lambda_permission" "api_gateway_permission" {
 }
 
 output "lambda_invoke_url" {
-  value = aws_api_gateway_deployment.apideploy.invoke_url
+  value = aws_api_gateway_stage.api_stage.invoke_url
 }
