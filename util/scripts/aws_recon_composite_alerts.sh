@@ -1,5 +1,7 @@
 #!/bin/bash
 
+wget -qO- icanhazip.com
+
 # Account recon work - should trigger potential stolen credentials composite alert
 aws sts get-caller-identity || true
 aws iam get-user || true
