@@ -33,15 +33,15 @@ locals {
   engine_details = {
     "postgres" = {
       "engine"                 = "postgres"
-      "engine_version"         = 14.8
+      "engine_version"         = 17.4
       "port"                   = 5432
-      "parameter_group_family" = "postgres14"
+      "parameter_group_family" = "postgres17"
     }
     "mysql" = {
       "engine"                 = "mysql"
-      "engine_version"         = "8.0.42"
+      "engine_version"         = "8.4.4"
       "port"                   = 3306
-      "parameter_group_family" = "mysql8.0"
+      "parameter_group_family" = "mysql8.4"
     }
   }
   final_version      = var.engine_version != null ? var.engine_version : local.engine_details[var.engine].engine_version
