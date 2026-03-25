@@ -63,20 +63,20 @@
     when: do_deploy and ubuntu_linux
 
     ## amazon linux
-  - name: configure the lacework repo  
-    yum_repository:  
-      name: packages-lacework-prod  
-      description: packages-lacework-prod  
-      baseurl: https://packages.lacework.net/latest/RPMS/x86_64/  
-      gpgkey: https://packages.lacework.net/latest/keys/RPM-GPG-KEY-lacework  
-      gpgcheck: yes  
-      enabled: yes  
+  - name: configure the lacework repo
+    yum_repository:
+      name: packages-lacework-prod
+      description: packages-lacework-prod
+      baseurl: https://packages.lacework.net/latest/RPMS/x86_64/
+      gpgkey: https://packages.lacework.net/latest/keys/RPM-GPG-KEY-lacework
+      gpgcheck: yes
+      enabled: yes
     when: do_deploy and amazon_linux
 
-  - name: install lacework datacollector  
-    yum:  
-      name: lacework  
-      state: latest  
+  - name: install lacework datacollector
+    yum:
+      name: lacework
+      state: latest
     when: do_deploy and amazon_linux
 
     ## shared linux
@@ -97,6 +97,11 @@
       dest: /var/lib/lacework/config/syscall_config.yaml
     become: true
     when: do_deploy and linux and (syscall_template is defined)
+  - name: Restart datacollector
+    ansible.builtin.systemd_service:
+      name: datacollector
+      state: restarted
+    when: do_deploy and linux
 
   - name: Install Lacework Agent MSI
     ansible.windows.win_package:
@@ -105,3 +110,4 @@
       - ACCESSTOKEN={{ access_token }}
       - SERVERURL={{ api_server }}
     when: (ansible_system | lower == 'win32nt') and do_deploy
+
