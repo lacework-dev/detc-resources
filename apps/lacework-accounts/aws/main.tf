@@ -2,7 +2,7 @@ terraform {
   required_providers {
     lacework = {
       source  = "lacework/lacework"
-      version = "2.0.5"
+      version = "2.3.0"
     }
   }
 }
