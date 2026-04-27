@@ -7,7 +7,9 @@ terraform {
   }
 }
 
-variable "lacework_account" {}
+variable "lacework_account" {
+  type = string
+}
 variable "lacework_subaccount" {}
 variable "lacework_apikey" {}
 variable "lacework_apisecret" {}
