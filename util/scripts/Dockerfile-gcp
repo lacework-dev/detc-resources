@@ -1,0 +1,19 @@
+# Start from the official Ubuntu base
+FROM ubuntu:24.04
+
+# Update and install necessary server tools
+RUN apt-get update && apt-get install -y \
+    curl \
+    vim \
+    net-tools \
+    jq \
+    tor \
+    iputils-ping \
+    fish \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -sSL https://sdk.cloud.google.com | bash
+
+ENV PATH $PATH:/root/google-cloud-sdk/bin
+# Set your working directory
+WORKDIR /app
