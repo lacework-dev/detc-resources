@@ -94,6 +94,7 @@ azure-k8s:
         - helper: RunCommand
           args:
             commands:
+              - ["mkdir", "-p", "lacework-agent/config/"]
               - ["mv", "syscall.j2", "lacework-agent/config/syscall_config.yaml"]
         - helper: WriteValue
           run_on_dryrun: true
