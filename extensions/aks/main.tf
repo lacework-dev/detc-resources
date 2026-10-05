@@ -23,7 +23,7 @@ variable "deployment_name" {
 }
 
 variable "instance_size" {
-  default = "standard_ds2"
+  default = "Standard_D2_v2"
 }
 
 variable "tags" {
@@ -96,6 +96,7 @@ resource "azurerm_kubernetes_cluster" "default" {
   dns_prefix                          = "${local.cluster_name}-k8s"
   private_cluster_public_fqdn_enabled = true
   tags = merge({name = var.deployment_name}, var.tags)
+  oidc_issuer_enabled = true
 
   default_node_pool {
     name            = "default"
@@ -104,6 +105,8 @@ resource "azurerm_kubernetes_cluster" "default" {
     os_disk_size_gb = 30
     vnet_subnet_id  = azurerm_subnet.aks.id
     tags = merge({name = var.deployment_name}, var.tags)
+    os_sku     = "AzureLinux"
+    temporary_name_for_rotation = "rotation"
   }
 
   service_principal {

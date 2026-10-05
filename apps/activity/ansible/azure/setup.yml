@@ -6,6 +6,11 @@
       update_cache: "yes"
       force_apt_get: "yes"
 
+  - name: Install python3-idna
+    apt:
+      name: "python3-idna"
+      state: present
+
   - name: Install packages needed
     apt:
       name: "unzip"

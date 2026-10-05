@@ -109,5 +109,5 @@
       arguments:
       - ACCESSTOKEN={{ access_token }}
       - SERVERURL={{ api_server }}
-    when: (ansible_system | lower == 'win32nt') and do_deploy
+    when: ansible_system == 'Win32NT' and do_deploy | bool
 
